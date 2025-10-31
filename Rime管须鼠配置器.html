@@ -1,0 +1,974 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Rime 可视化配置器（.custom.yaml 生成器）</title>
+<script src="https://cdn.jsdelivr.net/npm/js-yaml@4.1.0/dist/js-yaml.min.js"></script>
+<style>
+  :root {
+    --bg:#0b0c0f;
+    --card:#151922;
+    --card-hover:#1a1f2c;
+    --muted:#8ea0b5;
+    --text:#e7ecf3;
+    --accent:#5ac8fa;
+    --accent-hover:#4ab3e8;
+    --border:#273043;
+    --input-bg:#0f1320;
+  }
+
+  * { box-sizing: border-box; }
+
+  html,body{
+    background:var(--bg);
+    color:var(--text);
+    font:15px/1.6 system-ui, -apple-system, Segoe UI, Roboto, "PingFang SC", "Noto Sans CJK SC", sans-serif;
+    margin:0;
+    padding:0;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .wrap{
+    max-width:1100px;
+    margin:40px auto;
+    padding:0 24px;
+  }
+
+  .card{
+    background:var(--card);
+    border-radius:16px;
+    padding:28px 32px;
+    margin:20px 0;
+    box-shadow:0 4px 20px rgba(0,0,0,.3);
+    transition: transform .2s ease, box-shadow .2s ease;
+  }
+
+  .card:hover{
+    box-shadow:0 6px 24px rgba(0,0,0,.4);
+  }
+
+  h1{
+    font-size:28px;
+    font-weight:700;
+    margin:0 0 8px;
+    display:flex;
+    align-items:center;
+    flex-wrap:wrap;
+    gap:12px;
+  }
+
+  h2{
+    font-size:14px;
+    font-weight:600;
+    text-transform:uppercase;
+    letter-spacing:.5px;
+    margin:0 0 16px;
+    color:var(--muted);
+    padding-bottom:8px;
+    border-bottom:1px solid var(--border);
+  }
+
+  .section{
+    margin-bottom:32px;
+  }
+
+  .section:last-child{
+    margin-bottom:0;
+  }
+
+  label{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    margin:12px 0;
+    cursor:pointer;
+    font-size:14px;
+  }
+
+  label:hover{
+    color:var(--accent);
+  }
+
+  .label-text{
+    flex:1;
+    min-width:0;
+  }
+
+  input[type="text"],
+  input[type="number"],
+  select{
+    flex:1;
+    min-width:200px;
+    max-width:400px;
+    background:var(--input-bg);
+    border:1px solid var(--border);
+    border-radius:10px;
+    padding:10px 14px;
+    color:var(--text);
+    font-size:14px;
+    transition: border-color .2s ease, background .2s ease;
+  }
+
+  select{
+    cursor:pointer;
+  }
+
+  select option{
+    background:var(--card);
+    color:var(--text);
+  }
+
+  input[type="number"]{
+    min-width:80px;
+  }
+
+  input[type="text"]:focus,
+  input[type="number"]:focus,
+  select:focus{
+    outline:none;
+    border-color:var(--accent);
+    background:#131825;
+  }
+
+  .row{
+    display:flex;
+    flex-wrap:wrap;
+    gap:20px;
+    align-items:center;
+  }
+
+  .switch{
+    appearance:none;
+    width:48px;
+    height:28px;
+    background:#2a3346;
+    border-radius:20px;
+    position:relative;
+    outline:none;
+    cursor:pointer;
+    transition:background .2s ease;
+    flex-shrink:0;
+  }
+
+  .switch:hover{
+    background:#323d54;
+  }
+
+  .switch:checked{
+    background:var(--accent);
+  }
+
+  .switch:checked:hover{
+    background:var(--accent-hover);
+  }
+
+  .switch::after{
+    content:"";
+    position:absolute;
+    top:3px;
+    left:3px;
+    width:22px;
+    height:22px;
+    background:#fff;
+    border-radius:50%;
+    transition:transform .25s ease;
+    box-shadow:0 2px 4px rgba(0,0,0,.2);
+  }
+
+  .switch:checked::after{
+    transform:translateX(20px);
+  }
+
+  .radio-wrap{
+    display:flex;
+    gap:16px;
+    flex-wrap:wrap;
+  }
+
+  input[type="radio"]{
+    width:18px;
+    height:18px;
+    cursor:pointer;
+    accent-color:var(--accent);
+  }
+
+  .badge{
+    display:inline-block;
+    padding:4px 10px;
+    border-radius:6px;
+    background:#223047;
+    color:#b5c2d5;
+    font-size:11px;
+    font-weight:600;
+    text-transform:uppercase;
+    letter-spacing:.3px;
+  }
+
+  .grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(280px,1fr));
+    gap:32px;
+  }
+
+  textarea{
+    width:100%;
+    min-height:280px;
+    background:var(--input-bg);
+    border:1px solid var(--border);
+    border-radius:12px;
+    padding:16px;
+    color:#bfe2ff;
+    font-family:'SF Mono', Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace;
+    font-size:13px;
+    line-height:1.6;
+    white-space:pre;
+    resize:vertical;
+    transition: border-color .2s ease;
+  }
+
+  textarea:focus{
+    outline:none;
+    border-color:var(--accent);
+  }
+
+  button{
+    background:var(--accent);
+    color:#001018;
+    border:0;
+    border-radius:10px;
+    padding:12px 24px;
+    font-weight:600;
+    font-size:14px;
+    cursor:pointer;
+    transition:background .2s ease, transform .1s ease;
+    white-space:nowrap;
+  }
+
+  button:hover{
+    background:var(--accent-hover);
+    transform:translateY(-1px);
+  }
+
+  button:active{
+    transform:translateY(0);
+  }
+
+  .muted{
+    color:var(--muted);
+    font-size:13px;
+    line-height:1.5;
+  }
+
+  .drop{
+    border:2px dashed #3a4761;
+    border-radius:12px;
+    padding:40px 24px;
+    text-align:center;
+    color:#9fb2c7;
+    cursor:pointer;
+    transition:all .2s ease;
+    background:rgba(15,19,32,.3);
+  }
+
+  .drop:hover{
+    border-color:#4a5771;
+    background:rgba(15,19,32,.5);
+  }
+
+  .drop.drag{
+    background:var(--input-bg);
+    border-color:var(--accent);
+    color:var(--accent);
+    border-width:3px;
+  }
+
+  code{
+    background:var(--input-bg);
+    border:1px solid var(--border);
+    border-radius:6px;
+    padding:2px 8px;
+    font-family:'SF Mono', Monaco, Consolas, monospace;
+    font-size:12px;
+  }
+
+  .hint{
+    margin-top:8px;
+    padding:12px 16px;
+    background:rgba(90,200,250,.08);
+    border-left:3px solid var(--accent);
+    border-radius:6px;
+  }
+
+  @media (max-width: 768px){
+    .wrap{
+      margin:20px auto;
+      padding:0 16px;
+    }
+
+    .card{
+      padding:20px;
+      margin:16px 0;
+    }
+
+    h1{
+      font-size:24px;
+    }
+
+    .grid{
+      grid-template-columns:1fr;
+      gap:24px;
+    }
+
+    input[type="text"],
+    input[type="number"],
+    select{
+      max-width:100%;
+    }
+
+    .row{
+      flex-direction:column;
+      align-items:flex-start;
+    }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Rime 可视化配置器 <span class="badge">生成 *.custom.yaml</span></h1>
+
+  <div class="card">
+    <div class="grid">
+      <div class="section">
+        <h2>方案（Schema）</h2>
+        <div style="margin-bottom:8px">
+          <div class="label-text" style="margin-bottom:8px">方案标识（文件前缀）</div>
+          <input id="schemaId" type="text" value="luna_pinyin" placeholder="例如: luna_pinyin" style="width:100%;max-width:100%" />
+        </div>
+        <div class="muted">生成的文件名：<code id="outName">luna_pinyin.custom.yaml</code></div>
+      </div>
+
+      <div class="section">
+        <h2>默认字形</h2>
+        <div class="radio-wrap">
+          <label><input type="radio" name="simp" value="simp" checked /> 默认简体</label>
+          <label><input type="radio" name="simp" value="trad" /> 默认繁体</label>
+        </div>
+        <div class="muted" style="margin-top:12px">热键切换：<code>Control+Shift+F</code></div>
+      </div>
+
+      <div class="section">
+        <h2>输入模式</h2>
+        <label>
+          <input class="switch" id="asciiMode" type="checkbox" checked />
+          <span class="label-text">默认「中文模式」</span>
+          <span class="badge">关闭=西文</span>
+        </label>
+        <label>
+          <input class="switch" id="fullShape" type="checkbox" />
+          <span class="label-text">默认「全角」</span>
+          <span class="badge">建议关闭</span>
+        </label>
+        <label>
+          <input class="switch" id="asciiPunct" type="checkbox" checked />
+          <span class="label-text">默认「中文标点」</span>
+        </label>
+      </div>
+
+      <div class="section">
+        <h2>热键配置</h2>
+        <div style="margin-bottom:8px">
+          <div class="label-text" style="margin-bottom:8px">简繁切换热键</div>
+          <div style="display:flex;gap:8px;align-items:center">
+            <input id="hotkey" type="text" value="Control+Shift+F" placeholder="Control+Shift+F" style="flex:1" readonly />
+            <button id="recordHotkey" style="padding:10px 16px;white-space:nowrap">🎹 录制</button>
+          </div>
+        </div>
+        <div class="muted">点击"录制"按钮后按下快捷键，或手动输入。多组热键用逗号分隔</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2 style="margin:0 0 24px">候选词设置</h2>
+    <div class="grid">
+      <div class="section">
+        <h2>页面显示</h2>
+        <label>
+          <span class="label-text">每页候选词数量</span>
+          <input id="pageSize" type="number" min="1" max="10" value="6" style="max-width:100px" />
+        </label>
+        <div class="muted">建议值：5-9 个</div>
+      </div>
+
+      <div class="section">
+        <h2>候选词标签</h2>
+        <div class="radio-wrap">
+          <label><input type="radio" name="selectLabels" value="number" checked /> 数字标签（1 2 3）</label>
+          <label><input type="radio" name="selectLabels" value="custom" /> 自定义标签</label>
+        </div>
+        <label id="customLabelsWrap" style="margin-top:12px;display:none">
+          <span class="label-text">自定义标签</span>
+          <input id="customLabels" type="text" placeholder="例如: a s d f g h j k l" />
+        </label>
+        <div class="muted" style="margin-top:8px">数字标签显示为 ①②③... 或 1 2 3...</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2 style="margin:0 0 24px">高级设置</h2>
+    <div class="grid">
+      <div class="section">
+        <h2>ASCII 模式</h2>
+        <label>
+          <input class="switch" id="asciiComposer" type="checkbox" checked />
+          <span class="label-text">启用 good_old_caps_lock</span>
+          <span class="badge">推荐开启</span>
+        </label>
+        <div class="muted">Caps Lock 传统行为（大写锁定）</div>
+      </div>
+
+      <div class="section">
+        <h2>识别器模式</h2>
+        <label>
+          <input class="switch" id="enableEmail" type="checkbox" checked />
+          <span class="label-text">邮箱识别</span>
+        </label>
+        <label>
+          <input class="switch" id="enableUrl" type="checkbox" checked />
+          <span class="label-text">URL 识别</span>
+        </label>
+        <label>
+          <input class="switch" id="enableUppercase" type="checkbox" checked />
+          <span class="label-text">大写字母识别</span>
+        </label>
+        <div class="muted">自动识别并直接输出特殊格式</div>
+      </div>
+    </div>
+
+    <div class="grid" style="margin-top:24px">
+      <div class="section">
+        <h2>标点符号</h2>
+        <label>
+          <input class="switch" id="enablePunctuator" type="checkbox" checked />
+          <span class="label-text">启用标点符号候选</span>
+          <span class="badge">推荐开启</span>
+        </label>
+        <div class="muted">输入 [ / ; 等符号时显示候选框（全角/半角切换）</div>
+      </div>
+
+      <div class="section">
+        <h2>其他开关</h2>
+        <label>
+          <input class="switch" id="enableEmoji" type="checkbox" />
+          <span class="label-text">启用 Emoji 输入</span>
+        </label>
+        <label>
+          <input class="switch" id="enableLunar" type="checkbox" />
+          <span class="label-text">显示农历日期</span>
+        </label>
+        <div class="muted">需要对应方案支持这些功能</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2 style="margin:0 0 24px">🎨 鼠须管皮肤配置 <span class="badge">squirrel.custom.yaml</span></h2>
+    <div class="grid">
+      <div class="section">
+        <h2>配色方案</h2>
+        <label>
+          <span class="label-text">浅色模式主题</span>
+          <select id="colorScheme" style="flex:1;min-width:200px;max-width:400px;background:var(--input-bg);border:1px solid var(--border);border-radius:10px;padding:10px 14px;color:var(--text);font-size:14px;cursor:pointer">
+            <option value="lost_temple" selected>孤寺 Lost Temple</option>
+            <option value="google">Google</option>
+            <option value="native">系统原生</option>
+            <option value="aqua">碧水 Aqua</option>
+            <option value="azure">青天 Azure</option>
+            <option value="luna">明月 Luna</option>
+            <option value="ink">墨池 Ink</option>
+            <option value="dark_temple">暗堂 Dark Temple</option>
+            <option value="starcraft">星际争霸 StarCraft</option>
+            <option value="clean_white">纯白 Clean White</option>
+            <option value="apathy">冷漠 Apathy</option>
+            <option value="dust">微尘 Dust</option>
+            <option value="solarized_rock">Solarized Rock</option>
+            <option value="solarized_light">Solarized Light</option>
+          </select>
+        </label>
+        <label>
+          <span class="label-text">深色模式主题</span>
+          <select id="colorSchemeDark" style="flex:1;min-width:200px;max-width:400px;background:var(--input-bg);border:1px solid var(--border);border-radius:10px;padding:10px 14px;color:var(--text);font-size:14px;cursor:pointer">
+            <option value="dark_temple">暗堂 Dark Temple</option>
+            <option value="mojave_dark">Mojave Dark</option>
+            <option value="solarized_dark">Solarized Dark</option>
+            <option value="ink">墨池 Ink</option>
+            <option value="purity_of_form">Purity of Form</option>
+            <option value="starcraft">星际争霸 StarCraft</option>
+            <option value="google">Google</option>
+            <option value="apathy">冷漠 Apathy</option>
+          </select>
+        </label>
+        <div class="muted">系统外观切换时自动使用对应主题</div>
+      </div>
+
+      <div class="section">
+        <h2>候选窗口布局</h2>
+        <div class="radio-wrap">
+          <label><input type="radio" name="candidateLayout" value="linear" checked /> 横向排列</label>
+          <label><input type="radio" name="candidateLayout" value="stacked" /> 纵向排列</label>
+        </div>
+        <label style="margin-top:12px">
+          <input class="switch" id="inlinePreedit" type="checkbox" checked />
+          <span class="label-text">单行模式 (inline_preedit)</span>
+        </label>
+        <div class="muted">横向排列更紧凑，纵向排列更清晰</div>
+      </div>
+    </div>
+
+    <div class="grid" style="margin-top:24px">
+      <div class="section">
+        <h2>字体设置</h2>
+        <label>
+          <span class="label-text">主字体</span>
+          <input id="fontFace" type="text" value="PingFangSC" placeholder="PingFangSC, Hiragino Sans GB" />
+        </label>
+        <label>
+          <span class="label-text">字体大小</span>
+          <input id="fontSize" type="number" min="10" max="36" value="16" style="max-width:100px" />
+        </label>
+        <div class="muted">常用字体：PingFangSC, STHeiti, Hiragino Sans GB</div>
+      </div>
+
+      <div class="section">
+        <h2>窗口外观</h2>
+        <label>
+          <span class="label-text">圆角半径</span>
+          <input id="cornerRadius" type="number" min="0" max="20" value="5" style="max-width:100px" />
+        </label>
+        <label>
+          <span class="label-text">行间距</span>
+          <input id="lineSpacing" type="number" min="0" max="20" value="5" style="max-width:100px" />
+        </label>
+        <label>
+          <span class="label-text">候选词间距</span>
+          <input id="spacing" type="number" min="0" max="20" value="8" style="max-width:100px" />
+        </label>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>载入现有配置（可选）</h2>
+    <div id="drop" class="drop">
+      <div style="font-size:16px;margin-bottom:8px">📁 拖拽 <code>*.custom.yaml</code> 文件到此处</div>
+      <div class="muted">自动解析并填充配置选项</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="row" style="justify-content:space-between;align-items:center;margin-bottom:16px">
+      <h2 style="margin:0">生成的 YAML 预览</h2>
+      <div style="display:flex;gap:8px">
+        <button id="btnGenSchema">⬇ 生成方案配置</button>
+        <button id="btnGenSquirrel">⬇ 生成皮肤配置</button>
+      </div>
+    </div>
+    <div class="radio-wrap" style="margin-bottom:16px">
+      <label><input type="radio" name="previewType" value="schema" checked /> 方案配置预览</label>
+      <label><input type="radio" name="previewType" value="squirrel" /> 皮肤配置预览</label>
+    </div>
+    <textarea id="preview" readonly></textarea>
+    <div class="hint">
+      <strong>部署说明：</strong>
+      <div style="margin-top:8px">
+        <strong>方式 1：</strong>将下载的文件放入 <code>~/Library/Rime/</code> 目录，然后在「鼠须管」菜单中点击「重新部署」。
+      </div>
+      <div style="margin-top:8px">
+        <strong>方式 2：</strong>命令行快速部署
+        <div style="display:flex;gap:8px;margin-top:8px;align-items:center">
+          <code id="deployCmd" style="flex:1;padding:8px 12px;background:#0a0e14;cursor:pointer;user-select:all">/Library/Input\ Methods/Squirrel.app/Contents/MacOS/Squirrel --reload</code>
+          <button id="copyCmd" style="padding:8px 16px;font-size:12px">📋 复制</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  const el = (id)=>document.getElementById(id);
+  const schemaId = el('schemaId');
+  const outName = el('outName');
+  const hotkey = el('hotkey');
+  const asciiMode = el('asciiMode');
+  const fullShape = el('fullShape');
+  const asciiPunct = el('asciiPunct');
+  const pageSize = el('pageSize');
+  const customLabels = el('customLabels');
+  const customLabelsWrap = el('customLabelsWrap');
+  const asciiComposer = el('asciiComposer');
+  const enableEmail = el('enableEmail');
+  const enableUrl = el('enableUrl');
+  const enableUppercase = el('enableUppercase');
+  const enablePunctuator = el('enablePunctuator');
+  const enableEmoji = el('enableEmoji');
+  const enableLunar = el('enableLunar');
+  // 皮肤配置元素
+  const colorScheme = el('colorScheme');
+  const colorSchemeDark = el('colorSchemeDark');
+  const fontFace = el('fontFace');
+  const fontSize = el('fontSize');
+  const cornerRadius = el('cornerRadius');
+  const lineSpacing = el('lineSpacing');
+  const spacing = el('spacing');
+  const inlinePreedit = el('inlinePreedit');
+  const preview = el('preview');
+  const drop = el('drop');
+
+  // 切换自定义标签输入框显示
+  document.querySelectorAll('input[name="selectLabels"]').forEach(radio=>{
+    radio.addEventListener('change', ()=>{
+      customLabelsWrap.style.display = radio.value === 'custom' ? 'flex' : 'none';
+      updatePreview();
+    });
+  });
+
+  // 快捷键录制功能
+  let isRecording = false;
+  const recordBtn = document.getElementById('recordHotkey');
+
+  recordBtn.addEventListener('click', ()=>{
+    if(isRecording){
+      // 停止录制
+      isRecording = false;
+      recordBtn.textContent = '🎹 录制';
+      recordBtn.style.background = '';
+      hotkey.removeAttribute('readonly');
+      return;
+    }
+
+    // 开始录制
+    isRecording = true;
+    recordBtn.textContent = '⏺ 录制中...';
+    recordBtn.style.background = '#dc3545';
+    hotkey.value = '按下快捷键...';
+    hotkey.focus();
+  });
+
+  hotkey.addEventListener('keydown', (e)=>{
+    if(!isRecording) return;
+
+    e.preventDefault();
+    const keys = [];
+
+    // 修饰键
+    if(e.ctrlKey || e.metaKey) keys.push('Control');
+    if(e.shiftKey) keys.push('Shift');
+    if(e.altKey) keys.push('Alt');
+
+    // 主键
+    const mainKey = e.key;
+    if(mainKey && !['Control','Shift','Alt','Meta'].includes(mainKey)){
+      // 特殊键名映射
+      const keyMap = {
+        ' ': 'space',
+        'Enter': 'Return',
+        'ArrowUp': 'Up',
+        'ArrowDown': 'Down',
+        'ArrowLeft': 'Left',
+        'ArrowRight': 'Right',
+        'Escape': 'Escape',
+        '`': 'grave',
+        '-': 'minus',
+        '=': 'equal',
+        '[': 'bracketleft',
+        ']': 'bracketright',
+        '\\': 'backslash',
+        ';': 'semicolon',
+        "'": 'apostrophe',
+        ',': 'comma',
+        '.': 'period',
+        '/': 'slash'
+      };
+
+      const mappedKey = keyMap[mainKey] || mainKey.toUpperCase();
+      keys.push(mappedKey);
+
+      // 生成热键字符串
+      const hotkeyStr = keys.join('+');
+      hotkey.value = hotkeyStr;
+
+      // 停止录制
+      setTimeout(()=>{
+        isRecording = false;
+        recordBtn.textContent = '🎹 录制';
+        recordBtn.style.background = '';
+        hotkey.removeAttribute('readonly');
+        updatePreview();
+      }, 300);
+    }
+  });
+
+  function getSimpDefault(){
+    const v = document.querySelector('input[name="simp"]:checked').value;
+    return v === 'simp' ? 1 : 0; // reset:1 简体；0 繁体
+  }
+
+  function getSelectLabels(){
+    const labelType = document.querySelector('input[name="selectLabels"]:checked').value;
+    if(labelType === 'custom' && customLabels.value.trim()){
+      return customLabels.value.trim().split(/\s+/).filter(Boolean);
+    }
+    // 默认数字标签
+    const size = parseInt(pageSize.value) || 9;
+    return Array.from({length: size}, (_, i) => i + 1);
+  }
+
+  function renderYaml(){
+    const hk = hotkey.value.split(',')
+      .map(s=>s.trim()).filter(Boolean);
+
+    const yamlObj = {
+      patch: {
+        schema: {
+          name: getSimpDefault() === 1 ? '朙月拼音（簡體優先）' : '朙月拼音（繁體優先）',
+          description: (getSimpDefault() === 1
+            ? '預設輸出簡體，可用熱鍵在簡繁間切換。'
+            : '預設輸出繁體，可用熱鍵在簡繁間切換。')
+        },
+        switches: [
+          { name: 'ascii_mode', reset: asciiMode.checked ? 0 : 1, states: [' 中文',' 西文'] },
+          { name: 'full_shape', reset: fullShape.checked ? 1 : 0, states: [' 半角',' 全角'] },
+          { name: 'simplification', reset: getSimpDefault(), states: [' 简体',' 繁體'] },
+          { name: 'ascii_punct', reset: asciiPunct.checked ? 0 : 1, states: [' 。，',' ．，'] }
+        ].concat(
+          enableEmoji.checked ? [{ name: 'emoji', reset: 1, states: ['🈚️','🈶️'] }] : [],
+          enableLunar.checked ? [{ name: 'lunar', reset: 0, states: ['☀️','🌙'] }] : []
+        ),
+        switcher: {
+          caption: '方案選單',
+          hotkeys: hk.length ? hk : ['Control+Shift+F'],
+          abbreviate_options: true,
+          option_list_separator: '／'
+        },
+        key_binder: {
+          import_preset: 'default',
+          bindings: [
+            { when: 'composing', accept: (hk[0]||'Control+Shift+F'), toggle: 'simplification' }
+          ]
+        },
+        menu: {
+          alternative_select_labels: getSelectLabels(),
+          page_size: parseInt(pageSize.value) || 9
+        }
+      }
+    };
+
+    // Punctuator 标点符号设置
+    if(enablePunctuator.checked){
+      yamlObj.patch.punctuator = { import_preset: 'default' };
+    }
+
+    // ASCII composer 设置
+    if(asciiComposer.checked){
+      yamlObj.patch.ascii_composer = { good_old_caps_lock: true };
+    }
+
+    // Recognizer patterns
+    const patterns = {};
+    if(enableEmail.checked){
+      patterns.email = "^[A-Za-z][-_.0-9A-Za-z]*@.*$";
+    }
+    if(enableUrl.checked){
+      patterns.url = "^(www[.]|https?:|ftp[.:]|mailto:|file:).*$|^[a-z]+[.].+$";
+    }
+    if(enableUppercase.checked){
+      patterns.uppercase = "[A-Z][-_+.'0-9A-Za-z]*$";
+    }
+    if(Object.keys(patterns).length > 0){
+      yamlObj.patch.recognizer = { patterns };
+    }
+
+    return yamlObj;
+  }
+
+  function renderSquirrelYaml(){
+    const candidateLayout = document.querySelector('input[name="candidateLayout"]:checked').value;
+
+    const squirrelObj = {
+      patch: {
+        show_notifications_when: 'appropriate',
+        style: {
+          color_scheme: colorScheme.value,
+          color_scheme_dark: colorSchemeDark.value,
+          candidate_list_layout: candidateLayout,
+          text_orientation: 'horizontal',
+          inline_preedit: inlinePreedit.checked,
+          corner_radius: parseInt(cornerRadius.value) || 5,
+          line_spacing: parseInt(lineSpacing.value) || 5,
+          spacing: parseInt(spacing.value) || 8,
+          font_face: fontFace.value || 'PingFangSC',
+          font_point: parseInt(fontSize.value) || 16
+        }
+      }
+    };
+
+    return squirrelObj;
+  }
+
+  function updatePreview(){
+    const previewType = document.querySelector('input[name="previewType"]:checked').value;
+    if(previewType === 'schema'){
+      const yamlObj = renderYaml();
+      preview.value = jsyaml.dump(yamlObj, {lineWidth: 120});
+      outName.textContent = `${schemaId.value || 'luna_pinyin'}.custom.yaml`;
+    } else {
+      const squirrelObj = renderSquirrelYaml();
+      preview.value = jsyaml.dump(squirrelObj, {lineWidth: 120});
+      outName.textContent = 'squirrel.custom.yaml';
+    }
+  }
+
+  function download(text, filename){
+    const blob = new Blob([text], {type: 'text/yaml;charset=utf-8'});
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = filename;
+    a.click();
+    URL.revokeObjectURL(a.href);
+  }
+
+  function parseYamlAndFill(yamlText){
+    try{
+      const data = jsyaml.load(yamlText);
+      const p = data && data.patch ? data.patch : data;
+      if(!p){ return; }
+
+      // 尝试从现有值回填
+      const sw = (p.switches||[]).reduce((m,x)=>{ m[x.name]=x; return m; },{});
+      if(sw.simplification){ // reset:1 简体；0 繁体
+        const simp = sw.simplification.reset === 1 ? 'simp' : 'trad';
+        document.querySelector(`input[name="simp"][value="${simp}"]`).checked = true;
+      }
+      if(sw.ascii_mode){ asciiMode.checked = (sw.ascii_mode.reset===0); }
+      if(sw.full_shape){ fullShape.checked = (sw.full_shape.reset===1); }
+      if(sw.ascii_punct){ asciiPunct.checked = (sw.ascii_punct.reset===0); }
+
+      if(p.switcher && Array.isArray(p.switcher.hotkeys) && p.switcher.hotkeys.length){
+        hotkey.value = p.switcher.hotkeys.join(', ');
+      }
+
+      // 回填 menu 设置
+      if(p.menu){
+        if(p.menu.page_size){ pageSize.value = p.menu.page_size; }
+        if(Array.isArray(p.menu.alternative_select_labels)){
+          const labels = p.menu.alternative_select_labels;
+          // 检查是否为数字标签
+          const isNumber = labels.every(l => typeof l === 'number');
+          if(isNumber){
+            document.querySelector('input[name="selectLabels"][value="number"]').checked = true;
+          } else {
+            document.querySelector('input[name="selectLabels"][value="custom"]').checked = true;
+            customLabels.value = labels.join(' ');
+            customLabelsWrap.style.display = 'flex';
+          }
+        }
+      }
+
+      // 回填 ascii_composer 设置
+      if(p.ascii_composer && p.ascii_composer.good_old_caps_lock !== undefined){
+        asciiComposer.checked = p.ascii_composer.good_old_caps_lock;
+      }
+
+      // 回填 recognizer 设置
+      if(p.recognizer && p.recognizer.patterns){
+        enableEmail.checked = !!p.recognizer.patterns.email;
+        enableUrl.checked = !!p.recognizer.patterns.url;
+        enableUppercase.checked = !!p.recognizer.patterns.uppercase;
+      }
+
+      updatePreview();
+    }catch(e){
+      alert('解析 YAML 失败：' + e.message);
+    }
+  }
+
+  // 预览类型切换
+  document.querySelectorAll('input[name="previewType"]').forEach(radio=>{
+    radio.addEventListener('change', updatePreview);
+  });
+
+  // 初始化
+  ['change','input'].forEach(evt=>{
+    document.addEventListener(evt, (e)=>{
+      updatePreview();
+    });
+  });
+  updatePreview();
+
+  // 拖拽读取现有 custom.yaml
+  ;['dragenter','dragover'].forEach(ev=>{
+    drop.addEventListener(ev, e=>{ e.preventDefault(); drop.classList.add('drag'); });
+  });
+  ;['dragleave','drop'].forEach(ev=>{
+    drop.addEventListener(ev, e=>{ e.preventDefault(); drop.classList.remove('drag'); });
+  });
+  drop.addEventListener('drop', async (e)=>{
+    const file = e.dataTransfer.files[0];
+    if(!file) return;
+    const text = await file.text();
+    parseYamlAndFill(text);
+    // 若文件名像 xxx.custom.yaml，尝试填充 schemaId
+    const m = file.name.match(/^(.+)\.custom\.yaml$/i);
+    if(m){ schemaId.value = m[1]; }
+    updatePreview();
+  });
+
+  // 生成并下载 - 方案配置
+  document.getElementById('btnGenSchema').addEventListener('click', ()=>{
+    const yamlObj = renderYaml();
+    const yamlText = jsyaml.dump(yamlObj, {lineWidth: 120});
+    const name = `${schemaId.value || 'luna_pinyin'}.custom.yaml`;
+    download(yamlText, name);
+  });
+
+  // 生成并下载 - 皮肤配置
+  document.getElementById('btnGenSquirrel').addEventListener('click', ()=>{
+    const squirrelObj = renderSquirrelYaml();
+    const yamlText = jsyaml.dump(squirrelObj, {lineWidth: 120});
+    download(yamlText, 'squirrel.custom.yaml');
+  });
+
+  // 复制部署命令
+  document.getElementById('copyCmd').addEventListener('click', async ()=>{
+    const cmd = document.getElementById('deployCmd').textContent;
+    try{
+      await navigator.clipboard.writeText(cmd);
+      const btn = document.getElementById('copyCmd');
+      const originalText = btn.textContent;
+      btn.textContent = '✓ 已复制';
+      btn.style.background = '#28a745';
+      setTimeout(()=>{
+        btn.textContent = originalText;
+        btn.style.background = '';
+      }, 2000);
+    }catch(e){
+      // 降级方案：选中文本
+      const range = document.createRange();
+      range.selectNode(document.getElementById('deployCmd'));
+      window.getSelection().removeAllRanges();
+      window.getSelection().addRange(range);
+    }
+  });
+
+  // 点击命令也可以选中
+  document.getElementById('deployCmd').addEventListener('click', function(){
+    const range = document.createRange();
+    range.selectNode(this);
+    window.getSelection().removeAllRanges();
+    window.getSelection().addRange(range);
+  });
+</script>
+</body>
+</html>
