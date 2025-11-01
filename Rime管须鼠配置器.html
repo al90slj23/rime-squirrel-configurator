@@ -468,7 +468,7 @@
           <input class="switch" id="enableLunar" type="checkbox" />
           <span class="label-text">显示农历日期</span>
         </label>
-        <div class="muted">需要对应方案支持这些功能</div>
+        <div class="muted">启用后会自动生成相应的词库和脚本文件</div>
       </div>
     </div>
   </div>
@@ -790,6 +790,48 @@
       yamlObj.patch.recognizer = { patterns };
     }
 
+    // Emoji 和农历支持的引擎配置
+    if(enableEmoji.checked || enableLunar.checked){
+      const translators = [
+        'punct_translator',
+        'script_translator'
+      ];
+
+      if(enableEmoji.checked){
+        translators.push('table_translator@emoji');
+      }
+      if(enableLunar.checked){
+        translators.push('lua_translator@date_translator');
+        translators.push('lua_translator@lunar_translator');
+      }
+
+      yamlObj.patch['engine/translators'] = translators;
+    }
+
+    // Emoji 配置
+    if(enableEmoji.checked){
+      yamlObj.patch.emoji = {
+        dictionary: 'emoji',
+        enable_completion: false,
+        prefix: '/',
+        suffix: '/',
+        tips: '〔表情〕',
+        tag: 'emoji'
+      };
+    }
+
+    // 农历和日期的识别模式
+    if(enableLunar.checked){
+      if(!yamlObj.patch.recognizer){
+        yamlObj.patch.recognizer = { patterns: {} };
+      }
+      if(!yamlObj.patch.recognizer.patterns){
+        yamlObj.patch.recognizer.patterns = {};
+      }
+      yamlObj.patch.recognizer.patterns.date = "^rq$";
+      yamlObj.patch.recognizer.patterns.lunar = "^nl$";
+    }
+
     return yamlObj;
   }
 
@@ -815,6 +857,370 @@
     };
 
     return squirrelObj;
+  }
+
+  function generateEmojiDict(){
+    return `---
+name: emoji
+version: "1.0"
+sort: by_weight
+use_preset_vocabulary: false
+...
+
+# 常用 Emoji 词库
+
+# 表情
+😀	xiaolian	1
+😁	luochilexiao	1
+😂	xikulian	1
+🤣	gundilexiao	1
+😃	zhangzuilexiao	1
+😄	meixiaolexiao	1
+😅	dahan	1
+😆	mizhuilexiao	1
+😊	weixiao	1
+😉	zhayan	1
+😍	aixin	1
+😘	qinqin	1
+😋	chankou	1
+😎	taiyanjing	1
+🤔	sikao	1
+😐	wubiaojing	1
+😑	wuyu	1
+😶	wuhua	1
+🙄	fanbaiyuan	1
+😏	huaixiao	1
+😣	jianjue	1
+😥	shiwang	1
+😮	jingya	1
+😯	chijing	1
+😪	kunle	1
+😫	pituan	1
+😴	shuijiao	1
+😌	manzu	1
+
+# 手势
+👍	zan	1
+👎	cai	1
+👌	ok	1
+✌️	shou	1
+🤞	jiaocha	1
+🤟	aini	1
+🤘	yaogun	1
+👏	guzhang	1
+🙌	jubei	1
+👐	zhangkai	1
+🤝	woshou	1
+🙏	qidao	1
+✊	quantou	1
+👊	chuiquan	1
+🤛	zuoquan	1
+🤜	youquan	1
+
+# 心形
+❤️	aixin	2
+💔	xinpo	1
+💕	aixin	1
+💖	aixin	1
+💗	aixin	1
+💘	aixin	1
+💙	lanxin	1
+💚	lvxin	1
+💛	huangxin	1
+🧡	chengxin	1
+💜	zixin	1
+🖤	heixin	1
+🤍	baixxin	1
+
+# 动物
+🐶	gou	1
+🐱	mao	1
+🐭	laoshu	1
+🐹	cangxhu	1
+🐰	tuzi	1
+🦊	huhu	1
+🐻	xiong	1
+🐼	xiongmao	1
+🐨	kaola	1
+🐯	laohu	1
+🦁	shizi	1
+🐮	niu	1
+🐷	zhu	1
+🐸	qingwa	1
+🐵	houzi	1
+🐔	ji	1
+🐧	qie	1
+🐦	niao	1
+🦆	ya	1
+🐺	lang	1
+🐗	yezhu	1
+🐴	ma	1
+🦄	dujiaoshou	1
+🐝	mifeng	1
+🐛	chongzi	1
+🦋	hudie	1
+🐌	wonziu	1
+🐞	piaochong	1
+🐢	wugui	1
+🐍	she	1
+🐙	zhangyu	1
+🦀	xie	1
+🐠	yu	1
+🐟	yu	1
+🐬	haitun	1
+🐳	jingyu	1
+🦈	shayu	1
+
+# 食物
+🍎	pingguo	1
+🍊	juzi	1
+🍋	ningmeng	1
+🍌	xiangjiao	1
+🍉	xigua	1
+🍇	putao	1
+🍓	caomei	1
+🍒	yingtao	1
+🍑	taozi	1
+🍍	boluo	1
+🥭	mangguo	1
+🥝	mihoutao	1
+🍅	xihongshi	1
+🥑	niuyouguo	1
+🥦	xilan	1
+🥒	huanggua	1
+🌶️	lajiao	1
+🌽	yumi	1
+🥕	huluobu	1
+🥔	tudou	1
+🍞	mianbao	1
+🥐	niujiao	1
+🧀	nailao	1
+🥚	jidan	1
+🍳	jidan	1
+🥓	bacon	1
+🥩	rou	1
+🍗	jitui	1
+🍖	rou	1
+🌭	regou	1
+🍔	hanbao	1
+🍟	shutiao	1
+🍕	pisa	1
+🥪	sanmingzhi	1
+🌮	taco	1
+🥗	shala	1
+🍝	yidali	1
+🍜	mian	1
+🍲	guo	1
+🍛	gali	1
+🍣	shousi	1
+🍱	biandang	1
+🥟	jiaozi	1
+🍤	xia	1
+🍙	fantuan	1
+🍚	mifan	1
+🥮	yuebing	1
+🍦	bingqilin	1
+🍧	bingsha	1
+🍨	bingqilin	1
+🍩	tianquan	1
+🍪	binggan	1
+🎂	dangao	1
+🍰	dangao	1
+🍫	qiaokeli	1
+🍬	tang	1
+🍭	tangguo	1
+🍯	fengmi	1
+🍼	naiping	1
+☕	kafei	1
+🍵	cha	1
+🥤	yinliao	1
+🍶	jiu	1
+🍺	pijiu	1
+🍻	pijiu	1
+🥂	xiangbin	1
+🍷	hongjiu	1
+🥃	weishiji	1
+🍸	jiweiiju	1
+🍹	yinliao	1
+🍾	xiangbin	1
+
+# 交通
+🚗	qiche	1
+🚕	chuzuche	1
+🚙	suv	1
+🚌	gongjiao	1
+🚎	dianche	1
+🚐	mianbao	1
+🚑	jiuhuche	1
+🚒	xiaofangche	1
+🚓	jingche	1
+🚚	huoche	1
+🚛	tuoche	1
+🏎️	saiche	1
+🚜	tuolaji	1
+🛵	motuoche	1
+🚲	zixingche	1
+✈️	feiji	1
+🚀	huojian	1
+🚁	zhishengji	1
+🚂	huoche	1
+🚃	dieche	1
+🚄	gaotie	1
+🚅	gaotie	1
+🚆	huoche	1
+🚇	ditie	1
+🚈	ditie	1
+🚉	che	1
+🚊	dianche	1
+🚝	ditie	1
+🚞	shan	1
+🚋	dianche	1
+🚌	bus	1
+🚍	bus	1
+🚎	dianche	1
+🚐	xiaoche	1
+⛵	chuang	1
+🚤	kuaiting	1
+⛴️	lunchuan	1
+🛳️	youlun	1
+🚢	chuan	1
+
+# 符号
+⭐	xing	1
+🌟	xing	1
+✨	shanshuo	1
+⚡	shandian	1
+🔥	huo	1
+💧	shui	1
+🌊	lang	1
+🎉	qingzhu	1
+🎊	caidai	1
+🎈	qiqiu	1
+🎁	liwu	1
+🎀	hudiejie	1
+🎵	yinyue	1
+🎶	yinyue	1
+🎤	maike	1
+🎧	erji	1
+📱	shouji	1
+💻	diannao	1
+⌨️	jianpan	1
+🖱️	shubiao	1
+🖨️	dayinji	1
+📷	xiangji	1
+📹	shexiangji	1
+📺	dianshi	1
+📻	shouyinji	1
+⏰	naozhong	1
+⏱️	jishiqi	1
+⏲️	shijian	1
+🕰️	zhong	1
+📖	shu	1
+📚	shu	1
+📝	biji	1
+📄	wenjian	1
+📃	wenjian	1
+📋	jiandian	1
+📌	dingzhen	1
+📍	weizhi	1
+✅	duihao	1
+❌	cha	1
+❎	cha	1
+✔️	dui	1
+☑️	xuanzhong	1
+⚠️	jinggao	1
+🚫	jinzhi	1
+⛔	jinzhi	1
+🔞	shiba	1
+📵	shoujijin	1
+🚭	jingyan	1
+♻️	huishou	1
+`;
+  }
+
+  function generateRimeLua(){
+    return `-- Rime Lua 扩展脚本
+-- 日期时间和农历功能
+
+-- 日期转换器
+function date_translator(input, seg)
+    if input == "rq" then
+        local year = os.date("%Y")
+        local month = os.date("%m")
+        local day = os.date("%d")
+        local time = os.date("%H:%M:%S")
+        local week_map = {"日", "一", "二", "三", "四", "五", "六"}
+        local week = "星期" .. week_map[tonumber(os.date("%w")) + 1]
+
+        -- 中文日期格式
+        yield(Candidate("date", seg.start, seg._end,
+            year .. "年" .. month .. "月" .. day .. "日",
+            "〔日期〕"))
+
+        -- 中文日期 + 星期
+        yield(Candidate("date", seg.start, seg._end,
+            year .. "年" .. month .. "月" .. day .. "日 " .. week,
+            "〔日期+星期〕"))
+
+        -- 中文日期 + 时间
+        yield(Candidate("date", seg.start, seg._end,
+            year .. "年" .. month .. "月" .. day .. "日 " .. time,
+            "〔日期+时间〕"))
+
+        -- ISO 日期格式
+        yield(Candidate("date", seg.start, seg._end,
+            os.date("%Y-%m-%d"),
+            "〔ISO日期〕"))
+
+        -- 斜杠日期格式
+        yield(Candidate("date", seg.start, seg._end,
+            os.date("%Y/%m/%d"),
+            "〔斜杠日期〕"))
+
+        -- 时间戳
+        yield(Candidate("date", seg.start, seg._end,
+            tostring(os.time()),
+            "〔时间戳〕"))
+    end
+end
+
+-- 农历转换器（简化版）
+function lunar_translator(input, seg)
+    if input == "nl" then
+        -- 天干地支年份
+        local tian_gan = {"甲", "乙", "丙", "丁", "戊", "己", "庚", "辛", "壬", "癸"}
+        local di_zhi = {"子", "丑", "寅", "卯", "辰", "巳", "午", "未", "申", "酉", "戌", "亥"}
+        local sheng_xiao = {"鼠", "牛", "虎", "兔", "龙", "蛇", "马", "羊", "猴", "鸡", "狗", "猪"}
+
+        local year = tonumber(os.date("%Y"))
+        local tian_index = ((year - 4) % 10) + 1
+        local di_index = ((year - 4) % 12) + 1
+
+        local gan_zhi = tian_gan[tian_index] .. di_zhi[di_index]
+        local xiao = sheng_xiao[di_index]
+
+        yield(Candidate("lunar", seg.start, seg._end,
+            gan_zhi .. "年 (" .. xiao .. "年)",
+            "〔农历年份〕"))
+
+        yield(Candidate("lunar", seg.start, seg._end,
+            year .. " " .. xiao .. "年",
+            "〔生肖〕"))
+
+        -- 节气提示
+        local month = tonumber(os.date("%m"))
+        local jie_qi_map = {
+            "立春/雨水", "惊蛰/春分", "清明/谷雨",
+            "立夏/小满", "芒种/夏至", "小暑/大暑",
+            "立秋/处暑", "白露/秋分", "寒露/霜降",
+            "立冬/小雪", "大雪/冬至", "小寒/大寒"
+        }
+        yield(Candidate("lunar", seg.start, seg._end,
+            "本月节气：" .. jie_qi_map[month],
+            "〔节气〕"))
+    end
+end
+`;
   }
 
   function updatePreview(){
@@ -931,6 +1337,18 @@
     const yamlText = jsyaml.dump(yamlObj, {lineWidth: 120});
     const name = `${schemaId.value || 'luna_pinyin'}.custom.yaml`;
     download(yamlText, name);
+
+    // 如果启用了 Emoji，下载 emoji 词库
+    if(enableEmoji.checked){
+      const emojiDict = generateEmojiDict();
+      download(emojiDict, 'emoji.dict.yaml');
+    }
+
+    // 如果启用了农历或 Emoji，下载 rime.lua
+    if(enableLunar.checked || enableEmoji.checked){
+      const rimeLua = generateRimeLua();
+      download(rimeLua, 'rime.lua');
+    }
   });
 
   // 生成并下载 - 皮肤配置
