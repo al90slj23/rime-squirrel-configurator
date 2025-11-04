@@ -33,19 +33,19 @@
   --accent:#2563eb;
   --accent-hover:#1d4ed8;
   --border:#d1d5db;
-  --input-bg:#f9fafb;
+  --input-bg:#ffffff;
   --switch-bg:#d1d5db;
   --switch-hover:#9ca3af;
   --badge-bg:#e5e7eb;
   --badge-text:#4b5563;
-  --textarea-text:#374151;
-  --drop-border:#9ca3af;
-  --drop-text:#6b7280;
+  --textarea-text:#1f2937;
+  --drop-border:#c7d2e0;
+  --drop-text:#4b5563;
   --button-text:#ffffff;
   --hint-bg:#dbeafe;
-  --code-bg:#f3f4f6;
-  --code-text:#1f2937;
-  --shadow:rgba(0,0,0,0.1);
+  --code-bg:#1f2937;
+  --code-text:#ffffff;
+  --shadow:rgba(0,0,0,0.08);
 }
 
 * { box-sizing: border-box; }
@@ -291,20 +291,19 @@ button:active{
 }
 
 .drop{
-  border:2px dashed var(--drop-border, #3a4761);
+  border:2px dashed var(--drop-border);
   border-radius:12px;
   padding:40px 24px;
   text-align:center;
-  color:var(--drop-text, #9fb2c7);
+  color:var(--drop-text);
   cursor:pointer;
   transition:all .2s ease;
   background:var(--input-bg);
-  opacity:0.7;
 }
 
 .drop:hover{
   border-color:var(--accent);
-  opacity:1;
+  background:var(--card-hover);
 }
 
 .drop.drag{
