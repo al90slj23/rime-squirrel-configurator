@@ -28,6 +28,28 @@
   const preview = el('preview');
   const drop = el('drop');
 
+  // 主题切换功能
+  const themeToggle = el('themeToggle');
+  const themeIcon = el('themeIcon');
+  const html = document.documentElement;
+
+  // 加载保存的主题或默认使用深色主题
+  const savedTheme = localStorage.getItem('theme') || 'dark';
+  if (savedTheme === 'light') {
+    html.setAttribute('data-theme', 'light');
+    themeIcon.textContent = '☀️';
+  }
+
+  // 主题切换按钮点击事件
+  themeToggle.addEventListener('click', () => {
+    const currentTheme = html.getAttribute('data-theme');
+    const newTheme = currentTheme === 'light' ? 'dark' : 'light';
+
+    html.setAttribute('data-theme', newTheme);
+    themeIcon.textContent = newTheme === 'light' ? '☀️' : '🌙';
+    localStorage.setItem('theme', newTheme);
+  });
+
   // 切换自定义标签输入框显示
   document.querySelectorAll('input[name="selectLabels"]').forEach(radio=>{
     radio.addEventListener('change', ()=>{
