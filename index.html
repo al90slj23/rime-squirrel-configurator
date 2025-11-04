@@ -14,7 +14,7 @@
 </button>
 
 <div class="wrap">
-  <h1>Rime 可视化配置器 <span class="badge">生成 *.custom.yaml</span><span class="badge" style="margin-left:8px">v1.0</span></h1>
+  <h1>Rime 可视化配置器 <span class="badge">生成 *.custom.yaml</span><span class="badge" style="margin-left:8px">v1.1</span></h1>
 
   <div class="card">
     <div class="grid">
@@ -55,15 +55,56 @@
       </div>
 
       <div class="section">
-        <h2>热键配置</h2>
-        <div style="margin-bottom:8px">
-          <div class="label-text" style="margin-bottom:8px">简繁切换热键</div>
+        <h2>快捷键配置</h2>
+
+        <div style="margin-bottom:16px">
+          <div class="label-text" style="margin-bottom:8px">切换输入法</div>
           <div style="display:flex;gap:8px;align-items:center">
-            <input id="hotkey" type="text" value="Control+Shift+F" placeholder="Control+Shift+F" style="flex:1" readonly />
-            <button id="recordHotkey" style="padding:10px 16px;white-space:nowrap">🎹 录制</button>
+            <input id="hotkeySwitch" type="text" value="Control+Shift" placeholder="Control+Shift" style="flex:1" />
+            <button class="record-btn" data-target="hotkeySwitch" style="padding:10px 16px;white-space:nowrap">🎹 录制</button>
           </div>
+          <div class="muted" style="margin-top:4px">轮换切换不同的输入方案</div>
         </div>
-        <div class="muted">点击"录制"按钮后按下快捷键，或手动输入。多组热键用逗号分隔</div>
+
+        <div style="margin-bottom:16px">
+          <div class="label-text" style="margin-bottom:8px">中英文切换</div>
+          <div style="display:flex;gap:8px;align-items:center">
+            <input id="hotkeyAscii" type="text" value="Shift_L" placeholder="Shift_L" style="flex:1" />
+            <button class="record-btn" data-target="hotkeyAscii" style="padding:10px 16px;white-space:nowrap">🎹 录制</button>
+          </div>
+          <div class="muted" style="margin-top:4px">在中文和英文模式之间切换</div>
+        </div>
+
+        <div style="margin-bottom:16px">
+          <div class="label-text" style="margin-bottom:8px">大小写切换</div>
+          <div style="display:flex;gap:8px;align-items:center">
+            <input id="hotkeyCapsLock" type="text" value="Caps_Lock" placeholder="Caps_Lock" style="flex:1" />
+            <button class="record-btn" data-target="hotkeyCapsLock" style="padding:10px 16px;white-space:nowrap">🎹 录制</button>
+          </div>
+          <div class="muted" style="margin-top:4px">切换大小写锁定</div>
+        </div>
+
+        <div style="margin-bottom:16px">
+          <div class="label-text" style="margin-bottom:8px">全角半角切换</div>
+          <div style="display:flex;gap:8px;align-items:center">
+            <input id="hotkeyFullShape" type="text" value="Control+space" placeholder="Control+space" style="flex:1" />
+            <button class="record-btn" data-target="hotkeyFullShape" style="padding:10px 16px;white-space:nowrap">🎹 录制</button>
+          </div>
+          <div class="muted" style="margin-top:4px">在全角和半角字符之间切换</div>
+        </div>
+
+        <div style="margin-bottom:8px">
+          <div class="label-text" style="margin-bottom:8px">简繁切换</div>
+          <div style="display:flex;gap:8px;align-items:center">
+            <input id="hotkey" type="text" value="Control+Shift+F" placeholder="Control+Shift+F" style="flex:1" />
+            <button class="record-btn" data-target="hotkey" style="padding:10px 16px;white-space:nowrap">🎹 录制</button>
+          </div>
+          <div class="muted" style="margin-top:4px">在简体和繁体之间切换</div>
+        </div>
+
+        <div class="muted" style="margin-top:12px;padding:8px;background:var(--input-bg);border-radius:4px">
+          💡 提示：点击"录制"按钮后按下快捷键，或手动输入。多组热键用逗号分隔。
+        </div>
       </div>
     </div>
   </div>

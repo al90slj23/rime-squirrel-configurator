@@ -2,6 +2,10 @@
   const schemaId = el('schemaId');
   const outName = el('outName');
   const hotkey = el('hotkey');
+  const hotkeySwitch = el('hotkeySwitch');
+  const hotkeyAscii = el('hotkeyAscii');
+  const hotkeyCapsLock = el('hotkeyCapsLock');
+  const hotkeyFullShape = el('hotkeyFullShape');
   const asciiMode = el('asciiMode');
   const fullShape = el('fullShape');
   const asciiPunct = el('asciiPunct');
@@ -60,28 +64,47 @@
 
   // 快捷键录制功能
   let isRecording = false;
-  const recordBtn = document.getElementById('recordHotkey');
+  let currentRecordTarget = null;
 
-  recordBtn.addEventListener('click', ()=>{
-    if(isRecording){
-      // 停止录制
-      isRecording = false;
-      recordBtn.textContent = '🎹 录制';
-      recordBtn.style.background = '';
-      hotkey.removeAttribute('readonly');
-      return;
-    }
+  // 为所有录制按钮添加事件监听
+  document.querySelectorAll('.record-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const targetId = btn.getAttribute('data-target');
+      const targetInput = document.getElementById(targetId);
 
-    // 开始录制
-    isRecording = true;
-    recordBtn.textContent = '⏺ 录制中...';
-    recordBtn.style.background = '#dc3545';
-    hotkey.value = '按下快捷键...';
-    hotkey.focus();
+      if(isRecording && currentRecordTarget === targetInput){
+        // 停止录制
+        isRecording = false;
+        currentRecordTarget = null;
+        btn.textContent = '🎹 录制';
+        btn.style.background = '';
+        targetInput.removeAttribute('readonly');
+        return;
+      }
+
+      // 停止之前的录制（如果有）
+      if(isRecording && currentRecordTarget){
+        const prevBtn = document.querySelector(`[data-target="${currentRecordTarget.id}"]`);
+        if(prevBtn){
+          prevBtn.textContent = '🎹 录制';
+          prevBtn.style.background = '';
+        }
+        currentRecordTarget.removeAttribute('readonly');
+      }
+
+      // 开始录制
+      isRecording = true;
+      currentRecordTarget = targetInput;
+      btn.textContent = '⏺ 录制中...';
+      btn.style.background = '#dc3545';
+      targetInput.value = '按下快捷键...';
+      targetInput.focus();
+    });
   });
 
-  hotkey.addEventListener('keydown', (e)=>{
-    if(!isRecording) return;
+  // 键盘事件处理函数
+  function handleHotkeyRecord(e) {
+    if(!isRecording || !currentRecordTarget) return;
 
     e.preventDefault();
     const keys = [];
@@ -93,7 +116,23 @@
 
     // 主键
     const mainKey = e.key;
-    if(mainKey && !['Control','Shift','Alt','Meta'].includes(mainKey)){
+
+    // 特殊处理：单独按修饰键的情况
+    if(['Control','Shift','Alt','Meta'].includes(mainKey)){
+      // 检查是否是左右修饰键
+      if(e.location === KeyboardEvent.DOM_KEY_LOCATION_LEFT){
+        if(mainKey === 'Shift') keys.push('Shift_L');
+        else if(mainKey === 'Control') keys.push('Control_L');
+        else if(mainKey === 'Alt') keys.push('Alt_L');
+      } else if(e.location === KeyboardEvent.DOM_KEY_LOCATION_RIGHT){
+        if(mainKey === 'Shift') keys.push('Shift_R');
+        else if(mainKey === 'Control') keys.push('Control_R');
+        else if(mainKey === 'Alt') keys.push('Alt_R');
+      } else {
+        // 如果无法区分左右，则使用通用名称
+        if(keys.length === 0) keys.push(mainKey);
+      }
+    } else {
       // 特殊键名映射
       const keyMap = {
         ' ': 'space',
@@ -103,6 +142,7 @@
         'ArrowLeft': 'Left',
         'ArrowRight': 'Right',
         'Escape': 'Escape',
+        'CapsLock': 'Caps_Lock',
         '`': 'grave',
         '-': 'minus',
         '=': 'equal',
@@ -118,20 +158,28 @@
 
       const mappedKey = keyMap[mainKey] || mainKey.toUpperCase();
       keys.push(mappedKey);
-
-      // 生成热键字符串
-      const hotkeyStr = keys.join('+');
-      hotkey.value = hotkeyStr;
-
-      // 停止录制
-      setTimeout(()=>{
-        isRecording = false;
-        recordBtn.textContent = '🎹 录制';
-        recordBtn.style.background = '';
-        hotkey.removeAttribute('readonly');
-        updatePreview();
-      }, 300);
     }
+
+    // 生成热键字符串
+    const hotkeyStr = keys.join('+');
+    currentRecordTarget.value = hotkeyStr;
+
+    // 停止录制
+    setTimeout(()=>{
+      isRecording = false;
+      const btn = document.querySelector(`[data-target="${currentRecordTarget.id}"]`);
+      if(btn){
+        btn.textContent = '🎹 录制';
+        btn.style.background = '';
+      }
+      currentRecordTarget.removeAttribute('readonly');
+      currentRecordTarget = null;
+    }, 300);
+  }
+
+  // 为所有快捷键输入框添加键盘监听
+  [hotkey, hotkeySwitch, hotkeyAscii, hotkeyCapsLock, hotkeyFullShape].forEach(input => {
+    input.addEventListener('keydown', handleHotkeyRecord);
   });
 
   function getSimpDefault(){
@@ -172,14 +220,19 @@
         ),
         switcher: {
           caption: '方案選單',
-          hotkeys: hk.length ? hk : ['Control+Shift+F'],
+          hotkeys: (hotkeySwitch.value.trim() || 'Control+Shift').split(',').map(s=>s.trim()).filter(Boolean),
           abbreviate_options: true,
           option_list_separator: '／'
         },
         key_binder: {
           import_preset: 'default',
           bindings: [
-            { when: 'composing', accept: (hk[0]||'Control+Shift+F'), toggle: 'simplification' }
+            // 简繁切换
+            { when: 'composing', accept: (hk[0]||'Control+Shift+F'), toggle: 'simplification' },
+            // 中英文切换
+            { when: 'always', accept: (hotkeyAscii.value.trim() || 'Shift_L'), toggle: 'ascii_mode' },
+            // 全角半角切换
+            { when: 'always', accept: (hotkeyFullShape.value.trim() || 'Control+space'), toggle: 'full_shape' }
           ]
         },
         menu: {
@@ -194,9 +247,14 @@
       yamlObj.patch.punctuator = { import_preset: 'default' };
     }
 
-    // ASCII composer 设置
+    // ASCII composer 设置（Caps Lock 行为）
     if(asciiComposer.checked){
-      yamlObj.patch.ascii_composer = { good_old_caps_lock: true };
+      yamlObj.patch.ascii_composer = {
+        good_old_caps_lock: true,
+        switch_key: {
+          Caps_Lock: hotkeyCapsLock.value.trim() || 'Caps_Lock'
+        }
+      };
     }
 
     // Recognizer patterns
