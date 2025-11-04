@@ -30,8 +30,8 @@
   --card-hover:#f8fafb;
   --muted:#6b7280;
   --text:#1f2937;
-  --accent:#2563eb;
-  --accent-hover:#1d4ed8;
+  --accent:#4b5563;
+  --accent-hover:#374151;
   --border:#d1d5db;
   --input-bg:#ffffff;
   --switch-bg:#d1d5db;
@@ -43,8 +43,8 @@
   --drop-text:#4b5563;
   --button-text:#ffffff;
   --hint-bg:#dbeafe;
-  --code-bg:#1f2937;
-  --code-text:#ffffff;
+  --code-bg:#374151;
+  --code-text:#f3f4f6;
   --shadow:rgba(0,0,0,0.08);
 }
 
