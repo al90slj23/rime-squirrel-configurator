@@ -468,7 +468,12 @@
           <input class="switch" id="enableLunar" type="checkbox" />
           <span class="label-text">显示农历日期</span>
         </label>
-        <div class="muted">启用后会自动生成相应的词库和脚本文件</div>
+        <label>
+          <input class="switch" id="enableSymbols" type="checkbox" checked />
+          <span class="label-text">启用符号输入</span>
+          <span class="badge">推荐</span>
+        </label>
+        <div class="muted">启用后会自动生成相应的词库和脚本文件。符号输入包括：≈ ≠ ≤ ≥ → ← 等</div>
       </div>
     </div>
   </div>
@@ -614,6 +619,7 @@
   const enablePunctuator = el('enablePunctuator');
   const enableEmoji = el('enableEmoji');
   const enableLunar = el('enableLunar');
+  const enableSymbols = el('enableSymbols');
   // 皮肤配置元素
   const colorScheme = el('colorScheme');
   const colorSchemeDark = el('colorSchemeDark');
@@ -830,6 +836,35 @@
       }
       yamlObj.patch.recognizer.patterns.date = "^rq$";
       yamlObj.patch.recognizer.patterns.lunar = "^nl$";
+    }
+
+    // 符号输入配置
+    if(enableSymbols.checked){
+      yamlObj.patch['punctuator/symbols'] = {
+        '/ydy': ['≈'],
+        '/bdy': ['≠'],
+        '/xdy': ['≤', '⩽'],
+        '/gdy': ['≥', '⩾'],
+        '/jh': ['±', '＋', '－', '×', '÷', '∓'],
+        '/wq': ['∞', '∫', '∮', '∑', '∏'],
+        '/jh2': ['＝', '≡', '≌', '≈'],
+        '/px': ['⊥', '∥', '∠', '⌒', '⊙', '○', '●'],
+        '/jj': ['∵', '∴', '∷'],
+        '/zs': ['↑', '↓', '←', '→', '↖', '↗', '↙', '↘', '↔', '↕'],
+        '/sx': ['⇑', '⇓', '⇐', '⇒', '⇖', '⇗', '⇙', '⇘', '⇔', '⇕'],
+        '/dh': ['①', '②', '③', '④', '⑤', '⑥', '⑦', '⑧', '⑨', '⑩'],
+        '/xh': ['⑴', '⑵', '⑶', '⑷', '⑸', '⑹', '⑺', '⑻', '⑼', '⑽'],
+        '/xm': ['Ⅰ', 'Ⅱ', 'Ⅲ', 'Ⅳ', 'Ⅴ', 'Ⅵ', 'Ⅶ', 'Ⅷ', 'Ⅸ', 'Ⅹ', 'Ⅺ', 'Ⅻ'],
+        '/xxm': ['ⅰ', 'ⅱ', 'ⅲ', 'ⅳ', 'ⅴ', 'ⅵ', 'ⅶ', 'ⅷ', 'ⅸ', 'ⅹ'],
+        '/dw': ['°', '℃', '℉', '‰', '‱', '㎡', '㎥', '㎞', '㎏', '㎜'],
+        '/bz': ['$', '¥', '€', '£', '¢', '₩'],
+        '/xh2': ['※', '★', '☆', '○', '●', '◎', '◇', '◆', '□', '■', '△', '▲', '▽', '▼'],
+        '/fh': ['♠', '♣', '♥', '♦'],
+        '/ts': ['♩', '♪', '♫', '♬', '♭', '♮', '♯'],
+        '/sx2': ['Α', 'Β', 'Γ', 'Δ', 'Ε', 'Ζ', 'Η', 'Θ', 'Ι', 'Κ', 'Λ', 'Μ', 'Ν', 'Ξ', 'Ο', 'Π', 'Ρ', 'Σ', 'Τ', 'Υ', 'Φ', 'Χ', 'Ψ', 'Ω'],
+        '/xx': ['α', 'β', 'γ', 'δ', 'ε', 'ζ', 'η', 'θ', 'ι', 'κ', 'λ', 'μ', 'ν', 'ξ', 'ο', 'π', 'ρ', 'σ', 'τ', 'υ', 'φ', 'χ', 'ψ', 'ω'],
+        '/py': ['ā', 'á', 'ǎ', 'à', 'ē', 'é', 'ě', 'è', 'ī', 'í', 'ǐ', 'ì', 'ō', 'ó', 'ǒ', 'ò', 'ū', 'ú', 'ǔ', 'ù', 'ǖ', 'ǘ', 'ǚ', 'ǜ', 'ü', 'ê', 'ń', 'ň', 'ǹ']
+      };
     }
 
     return yamlObj;
