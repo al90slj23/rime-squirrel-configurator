@@ -57,14 +57,14 @@
       <div class="section">
         <h2>快捷键配置</h2>
 
-        <label style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;flex-wrap:wrap;gap:12px">
-          <span class="label-text">快捷键风格</span>
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;flex-wrap:wrap;gap:12px">
+          <div class="label-text" style="flex-shrink:0">快捷键风格</div>
           <div class="radio-wrap" style="gap:12px">
             <label style="margin:0"><input type="radio" name="hotkeyStyle" value="windows" checked /> Windows</label>
             <label style="margin:0"><input type="radio" name="hotkeyStyle" value="macos" /> macOS</label>
             <label style="margin:0"><input type="radio" name="hotkeyStyle" value="custom" /> 自定义</label>
           </div>
-        </label>
+        </div>
 
         <div style="margin-bottom:16px">
           <div class="label-text" style="margin-bottom:8px">切换输入法</div>
@@ -322,7 +322,7 @@
       <div style="margin-top:8px">
         <strong>方式 2：</strong>命令行快速部署
         <div style="display:flex;gap:8px;margin-top:8px;align-items:center">
-          <code id="deployCmd" style="flex:1;padding:8px 12px;background:#0a0e14;cursor:pointer;user-select:all">/Library/Input\ Methods/Squirrel.app/Contents/MacOS/Squirrel --reload</code>
+          <code id="deployCmd" style="flex:1;padding:8px 12px;cursor:pointer;user-select:all">/Library/Input\ Methods/Squirrel.app/Contents/MacOS/Squirrel --reload</code>
           <button id="copyCmd" style="padding:8px 16px;font-size:12px">📋 复制</button>
         </div>
       </div>

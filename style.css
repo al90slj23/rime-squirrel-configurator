@@ -87,8 +87,8 @@
   --hint-bg:#dbeafe;         /* 提示框背景 - 浅蓝色（醒目但不刺眼） */
 
   /* 代码块（终端命令） */
-  --code-bg:#374151;         /* 代码块背景 - 深灰色（模拟终端，不用纯黑） */
-  --code-text:#f3f4f6;       /* 代码块文字 - 浅灰白（柔和不刺眼） */
+  --code-bg:#e5e7eb;         /* 代码块背景 - 极浅灰（柔和背景，不刺眼） */
+  --code-text:#374151;       /* 代码块文字 - 深灰色（清晰可读） */
 
   /* 阴影效果 */
   --shadow:rgba(0,0,0,0.08); /* 轻柔阴影（卡片、按钮的阴影效果） */
@@ -447,4 +447,14 @@ code{
     right: 16px;
     font-size: 20px;
   }
+}
+
+/* 录制按钮样式 */
+.record-btn {
+  background: var(--accent);
+  color: var(--button-text);
+}
+
+.record-btn:hover {
+  background: var(--accent-hover);
 }
