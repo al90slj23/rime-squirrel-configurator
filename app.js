@@ -1,3 +1,4 @@
+document.addEventListener('DOMContentLoaded', () => {
   const el = (id)=>document.getElementById(id);
   const schemaId = el('schemaId');
   const outName = el('outName');
@@ -982,3 +983,5 @@ end
     window.getSelection().removeAllRanges();
     window.getSelection().addRange(range);
   });
+
+}); // End of DOMContentLoaded
