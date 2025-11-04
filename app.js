@@ -62,6 +62,87 @@
     });
   });
 
+  // 快捷键风格预设
+  const hotkeyPresets = {
+    windows: {
+      hotkeySwitch: 'Control+Shift',
+      hotkeyAscii: 'Shift_L',
+      hotkeyCapsLock: 'Caps_Lock',
+      hotkeyFullShape: 'Control+space',
+      hotkey: 'Control+Shift+F'
+    },
+    macos: {
+      hotkeySwitch: 'Control+space',
+      hotkeyAscii: 'Caps_Lock',
+      hotkeyCapsLock: 'Shift_L',
+      hotkeyFullShape: 'Shift+space',
+      hotkey: 'Control+Shift+4'
+    }
+  };
+
+  // 快捷键风格切换
+  let isManualEdit = false; // 标记是否手动编辑过
+
+  document.querySelectorAll('input[name="hotkeyStyle"]').forEach(radio => {
+    radio.addEventListener('change', () => {
+      const style = radio.value;
+
+      if (style === 'windows' || style === 'macos') {
+        isManualEdit = false;
+        const preset = hotkeyPresets[style];
+
+        // 应用预设值
+        hotkeySwitch.value = preset.hotkeySwitch;
+        hotkeyAscii.value = preset.hotkeyAscii;
+        hotkeyCapsLock.value = preset.hotkeyCapsLock;
+        hotkeyFullShape.value = preset.hotkeyFullShape;
+        hotkey.value = preset.hotkey;
+      }
+      // 如果是自定义，不做任何改变，保持当前值
+    });
+  });
+
+  // 检查快捷键是否匹配某个预设
+  function checkHotkeyStyle() {
+    if (isManualEdit) return; // 如果正在手动编辑，不检查
+
+    const currentValues = {
+      hotkeySwitch: hotkeySwitch.value.trim(),
+      hotkeyAscii: hotkeyAscii.value.trim(),
+      hotkeyCapsLock: hotkeyCapsLock.value.trim(),
+      hotkeyFullShape: hotkeyFullShape.value.trim(),
+      hotkey: hotkey.value.trim()
+    };
+
+    // 检查是否匹配 Windows 预设
+    const matchWindows = Object.keys(hotkeyPresets.windows).every(
+      key => currentValues[key] === hotkeyPresets.windows[key]
+    );
+
+    // 检查是否匹配 macOS 预设
+    const matchMacos = Object.keys(hotkeyPresets.macos).every(
+      key => currentValues[key] === hotkeyPresets.macos[key]
+    );
+
+    // 自动切换到匹配的风格
+    if (matchWindows) {
+      document.querySelector('input[name="hotkeyStyle"][value="windows"]').checked = true;
+    } else if (matchMacos) {
+      document.querySelector('input[name="hotkeyStyle"][value="macos"]').checked = true;
+    } else {
+      document.querySelector('input[name="hotkeyStyle"][value="custom"]').checked = true;
+    }
+  }
+
+  // 为所有快捷键输入框添加 input 事件监听
+  [hotkeySwitch, hotkeyAscii, hotkeyCapsLock, hotkeyFullShape, hotkey].forEach(input => {
+    input.addEventListener('input', () => {
+      isManualEdit = true;
+      checkHotkeyStyle();
+      setTimeout(() => { isManualEdit = false; }, 100);
+    });
+  });
+
   // 快捷键录制功能
   let isRecording = false;
   let currentRecordTarget = null;
@@ -174,6 +255,9 @@
       }
       currentRecordTarget.removeAttribute('readonly');
       currentRecordTarget = null;
+
+      // 录制完成后检查风格
+      checkHotkeyStyle();
     }, 300);
   }
 
