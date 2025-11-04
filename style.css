@@ -1,51 +1,97 @@
-/* 深色主题（默认） */
+/* ===== 深色主题（默认） ===== */
 :root {
-  --bg:#0b0c0f;
-  --card:#151922;
-  --card-hover:#1a1f2c;
-  --muted:#8ea0b5;
-  --text:#e7ecf3;
-  --accent:#5ac8fa;
-  --accent-hover:#4ab3e8;
-  --border:#273043;
-  --input-bg:#0f1320;
-  --switch-bg:#2a3346;
-  --switch-hover:#323d54;
-  --badge-bg:#223047;
-  --badge-text:#b5c2d5;
-  --textarea-text:#bfe2ff;
-  --drop-border:#3a4761;
-  --drop-text:#9fb2c7;
-  --button-text:#001018;
-  --hint-bg:rgba(90,200,250,.08);
-  --code-bg:#0f1320;
-  --code-text:#bfe2ff;
-  --shadow:rgba(0,0,0,0.3);
+  /* 基础背景色 */
+  --bg:#0b0c0f;              /* 页面主背景 - 深黑蓝 */
+  --card:#151922;            /* 卡片背景 - 深灰蓝 */
+  --card-hover:#1a1f2c;      /* 卡片悬停背景 - 稍亮的深灰蓝 */
+
+  /* 文字颜色 */
+  --muted:#8ea0b5;           /* 次要文字 - 浅蓝灰（提示文字、说明文字） */
+  --text:#e7ecf3;            /* 主要文字 - 浅灰白（标题、正文） */
+  --textarea-text:#bfe2ff;   /* 文本框内文字 - 浅蓝白 */
+
+  /* 主题色（按钮、链接等） */
+  --accent:#5ac8fa;          /* 主题色 - 亮青色（按钮、高亮元素） */
+  --accent-hover:#4ab3e8;    /* 主题色悬停 - 深青色 */
+
+  /* 边框颜色 */
+  --border:#273043;          /* 常规边框 - 深蓝灰（输入框、分隔线） */
+  --drop-border:#3a4761;     /* 拖放区边框 - 稍亮的深蓝灰 */
+
+  /* 输入框 */
+  --input-bg:#0f1320;        /* 输入框背景 - 深黑蓝 */
+
+  /* 开关按钮 */
+  --switch-bg:#2a3346;       /* 开关未选中背景 - 深灰蓝 */
+  --switch-hover:#323d54;    /* 开关悬停背景 - 稍亮的深灰蓝 */
+
+  /* 徽章（标签） */
+  --badge-bg:#223047;        /* 徽章背景 - 深蓝灰 */
+  --badge-text:#b5c2d5;      /* 徽章文字 - 浅蓝灰 */
+
+  /* 拖放区域 */
+  --drop-text:#9fb2c7;       /* 拖放区文字 - 浅蓝灰 */
+
+  /* 按钮 */
+  --button-text:#001018;     /* 按钮文字 - 深色（在亮色按钮上清晰） */
+
+  /* 提示框 */
+  --hint-bg:rgba(90,200,250,.08); /* 提示框背景 - 半透明青色 */
+
+  /* 代码块（终端命令） */
+  --code-bg:#0f1320;         /* 代码块背景 - 深黑蓝 */
+  --code-text:#bfe2ff;       /* 代码块文字 - 浅蓝白 */
+
+  /* 阴影效果 */
+  --shadow:rgba(0,0,0,0.3);  /* 深色阴影（卡片、按钮的阴影效果） */
 }
 
-/* 浅色主题 */
+/* ===== 浅色主题 ===== */
 [data-theme="light"] {
-  --bg:#f0f2f5;
-  --card:#ffffff;
-  --card-hover:#f8fafb;
-  --muted:#6b7280;
-  --text:#1f2937;
-  --accent:#4b5563;
-  --accent-hover:#374151;
-  --border:#d1d5db;
-  --input-bg:#ffffff;
-  --switch-bg:#d1d5db;
-  --switch-hover:#9ca3af;
-  --badge-bg:#e5e7eb;
-  --badge-text:#4b5563;
-  --textarea-text:#1f2937;
-  --drop-border:#c7d2e0;
-  --drop-text:#4b5563;
-  --button-text:#ffffff;
-  --hint-bg:#dbeafe;
-  --code-bg:#374151;
-  --code-text:#f3f4f6;
-  --shadow:rgba(0,0,0,0.08);
+  /* 基础背景色 */
+  --bg:#f0f2f5;              /* 页面主背景 - 浅灰色，柔和不刺眼 */
+  --card:#ffffff;            /* 卡片背景 - 纯白色 */
+  --card-hover:#f8fafb;      /* 卡片悬停背景 - 极浅灰 */
+
+  /* 文字颜色 */
+  --muted:#6b7280;           /* 次要文字 - 中灰色（提示文字、说明文字） */
+  --text:#1f2937;            /* 主要文字 - 深灰色（标题、正文） */
+  --textarea-text:#1f2937;   /* 文本框内文字 - 深灰色 */
+
+  /* 主题色（按钮、链接等） */
+  --accent:#4b5563;          /* 主题色 - 优雅灰（按钮、高亮元素） */
+  --accent-hover:#374151;    /* 主题色悬停 - 深灰色 */
+
+  /* 边框颜色 */
+  --border:#d1d5db;          /* 常规边框 - 浅灰色（输入框、分隔线） */
+  --drop-border:#c7d2e0;     /* 拖放区边框 - 稍深的浅灰 */
+
+  /* 输入框 */
+  --input-bg:#ffffff;        /* 输入框背景 - 纯白色 */
+
+  /* 开关按钮 */
+  --switch-bg:#d1d5db;       /* 开关未选中背景 - 浅灰色 */
+  --switch-hover:#9ca3af;    /* 开关悬停背景 - 中灰色 */
+
+  /* 徽章（标签） */
+  --badge-bg:#e5e7eb;        /* 徽章背景 - 极浅灰 */
+  --badge-text:#4b5563;      /* 徽章文字 - 中深灰 */
+
+  /* 拖放区域 */
+  --drop-text:#4b5563;       /* 拖放区文字 - 中深灰 */
+
+  /* 按钮 */
+  --button-text:#ffffff;     /* 按钮文字 - 白色（确保在灰色按钮上清晰可见） */
+
+  /* 提示框 */
+  --hint-bg:#dbeafe;         /* 提示框背景 - 浅蓝色（醒目但不刺眼） */
+
+  /* 代码块（终端命令） */
+  --code-bg:#374151;         /* 代码块背景 - 深灰色（模拟终端，不用纯黑） */
+  --code-text:#f3f4f6;       /* 代码块文字 - 浅灰白（柔和不刺眼） */
+
+  /* 阴影效果 */
+  --shadow:rgba(0,0,0,0.08); /* 轻柔阴影（卡片、按钮的阴影效果） */
 }
 
 * { box-sizing: border-box; }
