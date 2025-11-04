@@ -4,6 +4,8 @@
 
 **当前版本**: v1.2
 
+**在线使用**: [https://g.yao.fan/rime-squirrel-configurator/](https://g.yao.fan/rime-squirrel-configurator/)
+
 ## 功能特点
 
 ### 基础配置
@@ -48,7 +50,9 @@
 
 ### 1. 打开配置器
 
-在浏览器中打开 `Rime管须鼠配置器.html` 文件。
+**在线使用**（推荐）：访问 [https://g.yao.fan/rime-squirrel-configurator/](https://g.yao.fan/rime-squirrel-configurator/)
+
+**本地使用**：在浏览器中打开 `index.html` 文件。
 
 ### 2. 配置选项
 
