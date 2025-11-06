@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>模块化测试</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div style="padding:40px;max-width:800px;margin:0 auto">
+    <h1>Rime 配置器 - 模块化测试</h1>
+    
+    <button id="themeToggle" style="padding:10px 20px;margin-bottom:20px">
+      切换主题 <span id="themeIcon">🌙</span>
+    </button>
+
+    <div class="card">
+      <h2>快捷键测试</h2>
+      <input id="hotkey" type="text" value="Control+Shift+F" placeholder="按键..." style="width:300px" />
+      <button class="record-btn" data-target="hotkey" style="margin-left:10px">🎹 录制</button>
+      
+      <div style="margin-top:20px">
+        <label><input type="radio" name="hotkeyStyle" value="windows" checked /> Windows</label>
+        <label><input type="radio" name="hotkeyStyle" value="macos" /> macOS</label>
+        <label><input type="radio" name="hotkeyStyle" value="custom" /> 自定义</label>
+      </div>
+    </div>
+
+    <div class="card" style="margin-top:20px">
+      <h2>命令生成测试</h2>
+      
+      <!-- 隐藏的配置元素（命令生成器需要） -->
+      <input type="hidden" id="schemaId" value="luna_pinyin" />
+      <input type="hidden" id="hotkeySwitch" value="Control+Shift" />
+      <input type="hidden" id="hotkeyAscii" value="Shift_L" />
+      <input type="hidden" id="hotkeyCapsLock" value="Caps_Lock" />
+      <input type="hidden" id="hotkeyFullShape" value="Control+space" />
+      <input type="hidden" id="pageSize" value="6" />
+      <input type="hidden" id="colorScheme" value="lost_temple" />
+      <input type="hidden" id="colorSchemeDark" value="nord" />
+      <input type="checkbox" id="asciiMode" />
+      <input type="checkbox" id="fullShape" />
+      <input type="checkbox" id="asciiPunct" />
+      <input type="checkbox" id="asciiComposer" checked />
+      <input type="checkbox" id="enableEmail" checked />
+      <input type="checkbox" id="enableUrl" checked />
+      <input type="checkbox" id="enableUppercase" checked />
+      <input type="checkbox" id="enablePunctuator" checked />
+      <input type="checkbox" id="enableEmoji" checked />
+      <input type="checkbox" id="enableLunar" checked />
+      <input type="checkbox" id="enableSymbols" checked />
+      <input type="checkbox" id="inlinePreedit" />
+      <input type="radio" name="simp" value="simp" checked />
+      <input type="radio" name="selectLabels" value="number" checked />
+      <input type="radio" name="candidateLayout" value="vertical" checked />
+
+      <button id="copyCmd" style="padding:10px 20px;margin-bottom:10px">📋 复制命令</button>
+      <code id="deployCmd" style="display:block;padding:12px;background:#f5f5f5;color:#333;border-radius:8px;word-break:break-all;max-height:200px;overflow-y:auto">命令将自动生成...</code>
+    </div>
+  </div>
+
+  <script type="module" src="app-modular.js"></script>
+</body>
+</html>

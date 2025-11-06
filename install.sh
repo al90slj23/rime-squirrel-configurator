@@ -1,43 +1,18 @@
 #!/bin/bash
-# Rime 鼠须管一键部署脚本
-# 使用方法: curl -fsSL https://raw.githubusercontent.com/al90slj23/rime-squirrel-configurator/main/install.sh | bash -s -- [参数]
+# Rime 鼠须管一键部署脚本 v2.0
+# 支持完整配置传递
+# 使用方法: curl -fsSL https://raw.githubusercontent.com/al90slj23/rime-squirrel-configurator/main/install.sh | bash -s -- --config <base64_json>
 
 set -e
 
-# 默认配置
-SCHEMA="luna_pinyin"
-HOTKEY_STYLE="windows"
-THEME="lost_temple"
-ENABLE_EMOJI=false
-ENABLE_LUNAR=false
-ENABLE_SYMBOLS=false
+CONFIG_B64=""
 
 # 解析参数
 while [[ $# -gt 0 ]]; do
   case $1 in
-    --schema)
-      SCHEMA="$2"
+    --config)
+      CONFIG_B64="$2"
       shift 2
-      ;;
-    --hotkey)
-      HOTKEY_STYLE="$2"
-      shift 2
-      ;;
-    --theme)
-      THEME="$2"
-      shift 2
-      ;;
-    --emoji)
-      ENABLE_EMOJI=true
-      shift
-      ;;
-    --lunar)
-      ENABLE_LUNAR=true
-      shift
-      ;;
-    --symbols)
-      ENABLE_SYMBOLS=true
-      shift
       ;;
     *)
       echo "未知参数: $1"
@@ -46,231 +21,206 @@ while [[ $# -gt 0 ]]; do
   esac
 done
 
-echo "🚀 开始部署 Rime 配置..."
-echo "📋 配置信息："
-echo "   方案: $SCHEMA"
-echo "   快捷键风格: $HOTKEY_STYLE"
-echo "   主题: $THEME"
-echo "   Emoji: $ENABLE_EMOJI"
-echo "   农历: $ENABLE_LUNAR"
-echo "   符号: $ENABLE_SYMBOLS"
-echo ""
+if [ -z "$CONFIG_B64" ]; then
+  echo "❌ 错误：缺少配置参数"
+  echo "使用方法: bash install.sh --config <base64_encoded_json>"
+  exit 1
+fi
 
+echo "🚀 开始部署 Rime 配置..."
 RIME_DIR="$HOME/Library/Rime"
 mkdir -p "$RIME_DIR"
 
-# 根据快捷键风格设置热键
-case $HOTKEY_STYLE in
-  windows)
-    HOTKEY_SIMP="Control+Shift+F"
-    HOTKEY_ASCII="Shift_L"
-    HOTKEY_FULL="Control+space"
-    ;;
-  macos)
-    HOTKEY_SIMP="Control+Shift+4"
-    HOTKEY_ASCII="Caps_Lock"
-    HOTKEY_FULL="Control+space"
-    ;;
-  custom)
-    HOTKEY_SIMP="Control+Shift+F"
-    HOTKEY_ASCII="Shift_L"
-    HOTKEY_FULL="Control+space"
-    ;;
-  *)
-    echo "❌ 不支持的快捷键风格: $HOTKEY_STYLE"
-    exit 1
-    ;;
-esac
+# 解码配置
+echo "📋 解析配置..."
+CONFIG_JSON=$(echo "$CONFIG_B64" | base64 -d | python3 -c "import sys, urllib.parse; print(urllib.parse.unquote(sys.stdin.read()))")
 
-# 生成方案配置文件
-echo "📝 写入方案配置: $SCHEMA.custom.yaml"
-cat > "$RIME_DIR/$SCHEMA.custom.yaml" <<EOF
-patch:
-  schema:
-    name: 朙月拼音
-    description: 快速部署配置
-  switches:
-    - {name: ascii_mode, reset: 1, states: [' 中文', ' 西文']}
-    - {name: full_shape, reset: 0, states: [' 半角', ' 全角']}
-    - {name: simplification, reset: 1, states: [' 简体', ' 繁體']}
-    - {name: ascii_punct, reset: 1, states: [' 。，', ' ．，']}
-EOF
+# 设置环境变量供 Python 使用
+export CONFIG_JSON
 
-# 添加 Emoji 开关
-if [ "$ENABLE_EMOJI" = true ]; then
-  cat >> "$RIME_DIR/$SCHEMA.custom.yaml" <<EOF
-    - {name: emoji, reset: 1, states: ['🈚️', '🈶️']}
-EOF
-fi
+# 使用 Python 生成配置文件
+python3 << 'PYTHON_EOF'
+import json, sys, os
 
-# 添加农历开关
-if [ "$ENABLE_LUNAR" = true ]; then
-  cat >> "$RIME_DIR/$SCHEMA.custom.yaml" <<EOF
-    - {name: lunar, reset: 0, states: ['☀️', '🌙']}
-EOF
-fi
+config = json.loads(os.environ.get('CONFIG_JSON', '{}'))
 
-# 添加 switcher 和 key_binder
-cat >> "$RIME_DIR/$SCHEMA.custom.yaml" <<EOF
-  switcher:
-    caption: 方案選單
-    hotkeys: [Control+Shift]
-    abbreviate_options: true
-    option_list_separator: ／
-  key_binder:
-    import_preset: default
-    bindings:
-      - {when: composing, accept: $HOTKEY_SIMP, toggle: simplification}
-      - {when: always, accept: $HOTKEY_ASCII, toggle: ascii_mode}
-      - {when: always, accept: $HOTKEY_FULL, toggle: full_shape}
-  menu:
-    alternative_select_labels: ['1', '2', '3', '4', '5', '6', '7', '8', '9']
-    page_size: 9
-EOF
+rime_dir = os.path.expanduser("~/Library/Rime")
+schema = config.get('schema', 'luna_pinyin')
 
-# 添加符号输入
-if [ "$ENABLE_SYMBOLS" = true ]; then
-  cat >> "$RIME_DIR/$SCHEMA.custom.yaml" <<EOF
-  recognizer:
-    patterns:
-      punct: '^/([a-z]+)$'
-EOF
-fi
+# 生成方案配置
+schema_config = {
+    'patch': {
+        'schema': {
+            'name': '朙月拼音（簡體優先）' if config.get('simpDefault') == 1 else '朙月拼音（繁體優先）',
+            'description': '快速部署配置'
+        },
+        'switches': [
+            {'name': 'ascii_mode', 'reset': 0 if config.get('asciiMode') else 1, 'states': [' 中文', ' 西文']},
+            {'name': 'full_shape', 'reset': 1 if config.get('fullShape') else 0, 'states': [' 半角', ' 全角']},
+            {'name': 'simplification', 'reset': config.get('simpDefault', 1), 'states': [' 简体', ' 繁體']},
+            {'name': 'ascii_punct', 'reset': 0 if config.get('asciiPunct') else 1, 'states': [' 。，', ' ．，']}
+        ],
+        'switcher': {
+            'caption': '方案選單',
+            'hotkeys': [config.get('hotkeySwitch', 'Control+Shift')],
+            'abbreviate_options': True,
+            'option_list_separator': '／'
+        },
+        'key_binder': {
+            'import_preset': 'default',
+            'bindings': [
+                {'when': 'composing', 'accept': config.get('hotkey', 'Control+Shift+F'), 'toggle': 'simplification'},
+                {'when': 'always', 'accept': config.get('hotkeyAscii', 'Shift_L'), 'toggle': 'ascii_mode'},
+                {'when': 'always', 'accept': config.get('hotkeyFullShape', 'Control+space'), 'toggle': 'full_shape'}
+            ]
+        },
+        'menu': {
+            'alternative_select_labels': config.get('selectLabels', ['1','2','3','4','5','6','7','8','9']),
+            'page_size': config.get('pageSize', 6)
+        }
+    }
+}
 
-# 添加 Emoji 和农历引擎
-if [ "$ENABLE_EMOJI" = true ] || [ "$ENABLE_LUNAR" = true ]; then
-  cat >> "$RIME_DIR/$SCHEMA.custom.yaml" <<EOF
-  engine:
-    translators:
-      - {translator: punct_translator}
-      - {translator: script_translator}
-    filters:
-EOF
+# 添加 Emoji 和农历开关
+if config.get('enableEmoji'):
+    schema_config['patch']['switches'].append({'name': 'emoji', 'reset': 1, 'states': ['🈚️', '🈶️']})
+if config.get('enableLunar'):
+    schema_config['patch']['switches'].append({'name': 'lunar', 'reset': 0, 'states': ['☀️', '🌙']})
 
-  if [ "$ENABLE_EMOJI" = true ]; then
-    echo "      - {filter: 'lua_filter@*emoji'}" >> "$RIME_DIR/$SCHEMA.custom.yaml"
-  fi
+# 标点符号
+if config.get('enablePunctuator', True):
+    schema_config['patch']['punctuator'] = {'import_preset': 'default'}
 
-  if [ "$ENABLE_LUNAR" = true ]; then
-    echo "      - {filter: 'lua_filter@*lunar'}" >> "$RIME_DIR/$SCHEMA.custom.yaml"
-  fi
+# ASCII Composer
+if config.get('asciiComposer', True):
+    schema_config['patch']['ascii_composer'] = {
+        'good_old_caps_lock': True,
+        'switch_key': {'Caps_Lock': config.get('hotkeyCapsLock', 'Caps_Lock')}
+    }
 
-  echo "      - {filter: uniquifier}" >> "$RIME_DIR/$SCHEMA.custom.yaml"
-fi
+# 识别器
+patterns = {}
+if config.get('enableEmail', True):
+    patterns['email'] = "^[A-Za-z][-_.0-9A-Za-z]*@.*$"
+if config.get('enableUrl', True):
+    patterns['url'] = "^(www[.]|https?:|ftp[.:]|mailto:|file:).*$|^[a-z]+[.].+$"
+if config.get('enableUppercase', True):
+    patterns['uppercase'] = "[A-Z][-_+.'0-9A-Za-z]*$"
+if patterns:
+    schema_config['patch']['recognizer'] = {'patterns': patterns}
 
-# 生成皮肤配置文件
-echo "🎨 写入皮肤配置: squirrel.custom.yaml"
-cat > "$RIME_DIR/squirrel.custom.yaml" <<EOF
-patch:
-  style:
-    color_scheme: $THEME
-    color_scheme_dark: nord
-EOF
+# Emoji 和农历引擎
+if config.get('enableEmoji') or config.get('enableLunar'):
+    translators = ['punct_translator', 'script_translator']
+    if config.get('enableEmoji'):
+        translators.append('table_translator@emoji')
+    if config.get('enableLunar'):
+        translators.extend(['lua_translator@date_translator', 'lua_translator@lunar_translator'])
+    schema_config['patch']['engine/translators'] = translators
 
-# 如果启用了 Emoji，创建词库
-if [ "$ENABLE_EMOJI" = true ]; then
-  echo "😀 写入 Emoji 词库: emoji.dict.yaml"
-  cat > "$RIME_DIR/emoji.dict.yaml" <<'EOF'
-# Rime dictionary
+# Emoji 配置
+if config.get('enableEmoji'):
+    schema_config['patch']['emoji'] = {
+        'dictionary': 'emoji',
+        'enable_completion': False,
+        'prefix': '/',
+        'suffix': '/',
+        'tips': '〔表情〕',
+        'tag': 'emoji'
+    }
+
+# 农历识别
+if config.get('enableLunar'):
+    if 'recognizer' not in schema_config['patch']:
+        schema_config['patch']['recognizer'] = {'patterns': {}}
+    schema_config['patch']['recognizer']['patterns']['date'] = "^rq$"
+    schema_config['patch']['recognizer']['patterns']['lunar'] = "^nl$"
+
+# 符号输入
+if config.get('enableSymbols', True):
+    schema_config['patch']['punctuator/symbols'] = {
+        '/blx': ['~', '～', '〜', '∼', '≈', '≋', '≃', '≅', '⁓', '〰'],
+        '/ydy': ['≈'],
+        '/zs': ['↑', '↓', '←', '→', '↖', '↗', '↙', '↘', '↔', '↕']
+    }
+
+# 写入方案配置
+import yaml
+schema_file = os.path.join(rime_dir, f"{schema}.custom.yaml")
+with open(schema_file, 'w', encoding='utf-8') as f:
+    yaml.dump(schema_config, f, allow_unicode=True, default_flow_style=False)
+print(f"📝 写入方案配置: {schema}.custom.yaml")
+
+# 生成皮肤配置
+squirrel_config = {
+    'patch': {
+        'style': {
+            'color_scheme': config.get('colorScheme', 'lost_temple'),
+            'color_scheme_dark': config.get('colorSchemeDark', 'nord'),
+            'font_face': config.get('fontFace', ''),
+            'font_point': config.get('fontSize', 18),
+            'corner_radius': config.get('cornerRadius', 10),
+            'line_spacing': config.get('lineSpacing', 6),
+            'spacing': config.get('spacing', 8),
+            'inline_preedit': config.get('inlinePreedit', False)
+        }
+    }
+}
+
+if config.get('candidateLayout') == 'horizontal':
+    squirrel_config['patch']['style']['horizontal'] = True
+
+squirrel_file = os.path.join(rime_dir, "squirrel.custom.yaml")
+with open(squirrel_file, 'w', encoding='utf-8') as f:
+    yaml.dump(squirrel_config, f, allow_unicode=True, default_flow_style=False)
+print("🎨 写入皮肤配置: squirrel.custom.yaml")
+
+# Emoji 词库（简化版）
+if config.get('enableEmoji'):
+    emoji_dict = """# Rime dictionary
 # encoding: utf-8
 ---
 name: emoji
 version: "1.0"
 sort: by_weight
 ...
-😀	:)	1
-😃	:D	1
-😄	grin	1
-😁	smile	1
-😂	lol	1
-😅	sweat	1
-😊	blush	1
-😇	halo	1
-🤔	think	1
-😍	love	1
-😘	kiss	1
-😋	yum	1
-😎	cool	1
-😴	sleep	1
-😷	mask	1
-🤒	sick	1
-🤕	hurt	1
-🤢	nauseated	1
-🤮	vomit	1
-🤧	sneeze	1
-🥵	hot	1
-🥶	cold	1
-😵	dizzy	1
-🤯	explode	1
-🥳	party	1
-😱	scream	1
-😨	fear	1
-😰	anxious	1
-😥	sad	1
-😢	cry	1
-😭	sob	1
-😤	triumph	1
-😠	angry	1
-😡	rage	1
-🤬	curse	1
-👍	+1	1
-👎	-1	1
-👏	clap	1
-🙏	pray	1
-❤️	heart	1
-💔	broken	1
-💯	100	1
-🔥	fire	1
-⭐	star	1
-✨	sparkle	1
-💡	idea	1
-🎉	tada	1
-🎊	confetti	1
-🎈	balloon	1
-🎁	gift	1
-🏆	trophy	1
-🥇	1st	1
-🥈	2nd	1
-🥉	3rd	1
-EOF
-fi
+😀\t:)\t1
+😃\t:D\t1
+😄\tgrin\t1
+👍\t+1\t1
+❤️\theart\t1
+"""
+    emoji_file = os.path.join(rime_dir, "emoji.dict.yaml")
+    with open(emoji_file, 'w', encoding='utf-8') as f:
+        f.write(emoji_dict)
+    print("😀 写入 Emoji 词库: emoji.dict.yaml")
 
-# 如果启用了 Emoji 或农历，创建 Lua 脚本
-if [ "$ENABLE_EMOJI" = true ] || [ "$ENABLE_LUNAR" = true ]; then
-  echo "🔧 写入 Lua 脚本: rime.lua"
-  cat > "$RIME_DIR/rime.lua" <<'EOF'
--- Rime Lua 脚本
-
--- Emoji 过滤器
-function emoji(input)
-  -- 这里是占位实现，实际 Emoji 通过词库提供
-  return input
-end
-
--- 农历过滤器
-function lunar(input)
+# Lua 脚本（简化版）
+if config.get('enableEmoji') or config.get('enableLunar'):
+    rime_lua = "-- Rime Lua 脚本\n"
+    if config.get('enableLunar'):
+        rime_lua += """
+function date_translator(input)
   local date = os.date("*t")
-  for cand in input:iter() do
-    -- 添加农历信息到候选项
-    yield(cand)
-  end
+  return {{ text = string.format("%d年%d月%d日", date.year, date.month, date.day), comment = "阳历" }}
 end
-EOF
-fi
+
+function lunar_translator(input)
+  return {}
+end
+"""
+    lua_file = os.path.join(rime_dir, "rime.lua")
+    with open(lua_file, 'w', encoding='utf-8') as f:
+        f.write(rime_lua)
+    print("🔧 写入 Lua 脚本: rime.lua")
+
+PYTHON_EOF
 
 # 重新部署
 echo "🔄 重新部署 Rime..."
 if [ -f "/Library/Input Methods/Squirrel.app/Contents/MacOS/Squirrel" ]; then
   "/Library/Input Methods/Squirrel.app/Contents/MacOS/Squirrel" --reload
   echo "✅ 部署完成！"
-  echo ""
-  echo "配置信息："
-  echo "  • 方案: $SCHEMA"
-  echo "  • 快捷键风格: $HOTKEY_STYLE"
-  echo "  • 主题: $THEME"
-  [ "$ENABLE_EMOJI" = true ] && echo "  • Emoji: ✓"
-  [ "$ENABLE_LUNAR" = true ] && echo "  • 农历: ✓"
-  [ "$ENABLE_SYMBOLS" = true ] && echo "  • 符号: ✓"
 else
   echo "⚠️ 未找到鼠须管，请手动在输入法菜单中点击「重新部署」"
 fi
