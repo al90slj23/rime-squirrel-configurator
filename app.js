@@ -402,6 +402,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // 符号输入配置
     if(enableSymbols.checked){
       yamlObj.patch['punctuator/symbols'] = {
+        '/blx': ['~', '～', '〜', '∼', '≈', '≋', '≃', '≅', '⁓', '〰'],
         '/ydy': ['≈'],
         '/bdy': ['≠'],
         '/xdy': ['≤', '⩽'],
