@@ -1133,185 +1133,30 @@ DEPLOYEOF
     const useLunar = cmdLunar.checked;
     const useSymbols = cmdSymbols.checked;
 
-    // 根据快捷键风格设置热键
-    const hotkeyMap = {
-      'windows': { simp: 'Control+Shift+F', ascii: 'Shift_L', full: 'Control+space' },
-      'macos': { simp: 'Control+Shift+4', ascii: 'Caps_Lock', full: 'Control+space' },
-      'custom': { simp: 'Control+Shift+F', ascii: 'Shift_L', full: 'Control+space' }
-    };
-    const hotkeys = hotkeyMap[hotkeyStyle];
+    // 构建命令参数
+    const params = [];
 
-    // 生成最小化方案配置
-    const yamlObj = {
-      patch: {
-        schema: {
-          name: '朙月拼音',
-          description: '快速部署配置'
-        },
-        switches: [
-          { name: 'ascii_mode', reset: 1, states: [' 中文',' 西文'] },
-          { name: 'full_shape', reset: 0, states: [' 半角',' 全角'] },
-          { name: 'simplification', reset: 1, states: [' 简体',' 繁體'] },
-          { name: 'ascii_punct', reset: 1, states: [' 。，',' ．，'] }
-        ],
-        switcher: {
-          caption: '方案選單',
-          hotkeys: ['Control+Shift'],
-          abbreviate_options: true,
-          option_list_separator: '／'
-        },
-        key_binder: {
-          import_preset: 'default',
-          bindings: [
-            { when: 'composing', accept: hotkeys.simp, toggle: 'simplification' },
-            { when: 'always', accept: hotkeys.ascii, toggle: 'ascii_mode' },
-            { when: 'always', accept: hotkeys.full, toggle: 'full_shape' }
-          ]
-        },
-        menu: {
-          alternative_select_labels: ['1','2','3','4','5','6','7','8','9'],
-          page_size: 9
-        }
-      }
-    };
-
-    // 添加 Emoji 和农历开关
-    if (useEmoji) {
-      yamlObj.patch.switches.push({ name: 'emoji', reset: 1, states: ['🈚️','🈶️'] });
-    }
-    if (useLunar) {
-      yamlObj.patch.switches.push({ name: 'lunar', reset: 0, states: ['☀️','🌙'] });
+    // 方案 ID（如果不是默认值）
+    if (schemaName !== 'luna_pinyin') {
+      params.push(`--schema ${schemaName}`);
     }
 
-    // 添加符号输入
-    if (useSymbols) {
-      yamlObj.patch.recognizer = {
-        patterns: { punct: '^/([a-z]+)$' }
-      };
-    }
+    // 快捷键风格
+    params.push(`--hotkey ${hotkeyStyle}`);
 
-    // 添加 Emoji 和农历引擎
-    if (useEmoji || useLunar) {
-      yamlObj.patch.engine = {
-        translators: [
-          { translator: 'punct_translator' },
-          { translator: 'script_translator' }
-        ],
-        filters: []
-      };
-      if (useEmoji) {
-        yamlObj.patch.engine.filters.push({ filter: 'lua_filter@*emoji' });
-      }
-      if (useLunar) {
-        yamlObj.patch.engine.filters.push({ filter: 'lua_filter@*lunar' });
-      }
-      yamlObj.patch.engine.filters.push({ filter: 'uniquifier' });
-    }
+    // 主题
+    params.push(`--theme ${colorScheme}`);
 
-    const schemaYaml = jsyaml.dump(yamlObj, { lineWidth: 120 });
+    // 功能开关
+    if (useEmoji) params.push('--emoji');
+    if (useLunar) params.push('--lunar');
+    if (useSymbols) params.push('--symbols');
 
-    // 生成皮肤配置
-    const squirrelObj = {
-      patch: {
-        style: {
-          color_scheme: colorScheme,
-          color_scheme_dark: 'nord'
-        }
-      }
-    };
-    const squirrelYaml = jsyaml.dump(squirrelObj, { lineWidth: 120 });
-
-    // 生成 Emoji 词库（简化版）
-    const emojiDict = useEmoji ? `# Rime dictionary
-# encoding: utf-8
----
-name: emoji
-version: "1.0"
-sort: by_weight
-...
-😀\t:)\t1
-😃\t:D\t1
-😄\tgrin\t1
-😁\tsmile\t1
-👍\t+1\t1
-👎\t-1\t1
-❤️\theart\t1
-` : '';
-
-    // 生成 Lua 脚本（简化版）
-    const rimeLua = (useEmoji || useLunar) ? `-- Rime Lua 脚本
-${useEmoji ? `
-function emoji(input)
-  return {
-    { text = "😀", comment = "开心" },
-    { text = "😃", comment = "大笑" }
-  }
-end
-` : ''}
-${useLunar ? `
-function lunar(input)
-  local date = os.date("*t")
-  return {
-    { text = string.format("%d年%d月%d日", date.year, date.month, date.day), comment = "阳历" }
-  }
-end
-` : ''}
-` : '';
-
-    // Base64 编码
-    const utf8ToB64 = (str) => btoa(encodeURIComponent(str).replace(/%([0-9A-F]{2})/g, (_, p1) => String.fromCharCode('0x' + p1)));
-    const schemaB64 = utf8ToB64(schemaYaml);
-    const squirrelB64 = utf8ToB64(squirrelYaml);
-    const emojiB64 = emojiDict ? utf8ToB64(emojiDict) : '';
-    const luaB64 = rimeLua ? utf8ToB64(rimeLua) : '';
-
-    // 生成部署脚本
-    let deployScript = `bash -c "$(cat <<'DEPLOYEOF'
-#!/bin/bash
-set -e
-echo "🚀 开始部署 Rime 配置..."
-RIME_DIR="\\$HOME/Library/Rime"
-mkdir -p "\\$RIME_DIR"
-
-# 部署方案配置
-echo "📝 写入方案配置: ${schemaName}.custom.yaml"
-echo "${schemaB64}" | base64 -d > "\\$RIME_DIR/${schemaName}.custom.yaml"
-
-# 部署皮肤配置
-echo "🎨 写入皮肤配置: squirrel.custom.yaml"
-echo "${squirrelB64}" | base64 -d > "\\$RIME_DIR/squirrel.custom.yaml"
-`;
-
-    if (emojiB64) {
-      deployScript += `
-# 部署 Emoji 词库
-echo "😀 写入 Emoji 词库: emoji.dict.yaml"
-echo "${emojiB64}" | base64 -d > "\\$RIME_DIR/emoji.dict.yaml"
-`;
-    }
-
-    if (luaB64) {
-      deployScript += `
-# 部署 Lua 脚本
-echo "🔧 写入 Lua 脚本: rime.lua"
-echo "${luaB64}" | base64 -d > "\\$RIME_DIR/rime.lua"
-`;
-    }
-
-    deployScript += `
-# 重新部署
-echo "🔄 重新部署 Rime..."
-if [ -f "/Library/Input Methods/Squirrel.app/Contents/MacOS/Squirrel" ]; then
-  "/Library/Input Methods/Squirrel.app/Contents/MacOS/Squirrel" --reload
-  echo "✅ 部署完成！"
-else
-  echo "⚠️ 未找到鼠须管，请手动在输入法菜单中点击「重新部署」"
-fi
-DEPLOYEOF
-)"`;
+    // 生成最终命令
+    const deployCmd = `curl -fsSL https://raw.githubusercontent.com/al90slj23/rime-squirrel-configurator/main/install.sh | bash -s -- ${params.join(' ')}`;
 
     // 更新显示
-    document.getElementById('deployCmd').textContent = deployScript;
+    document.getElementById('deployCmd').textContent = deployCmd;
   }
 
   // 添加事件监听器
