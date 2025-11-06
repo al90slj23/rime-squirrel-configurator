@@ -1119,6 +1119,8 @@ DEPLOYEOF
 
   // 动态更新部署命令
   function updateDeployCommand() {
+    console.log('[命令生成] 开始生成部署命令');
+
     const cmdSchemaId = document.getElementById('cmdSchemaId');
     const cmdHotkeyStyle = document.getElementById('cmdHotkeyStyle');
     const cmdColorScheme = document.getElementById('cmdColorScheme');
@@ -1155,8 +1157,17 @@ DEPLOYEOF
     // 生成最终命令
     const deployCmd = `curl -fsSL https://raw.githubusercontent.com/al90slj23/rime-squirrel-configurator/main/install.sh | bash -s -- ${params.join(' ')}`;
 
+    console.log('[命令生成] 参数:', params);
+    console.log('[命令生成] 最终命令:', deployCmd);
+
     // 更新显示
-    document.getElementById('deployCmd').textContent = deployCmd;
+    const cmdElement = document.getElementById('deployCmd');
+    if (cmdElement) {
+      cmdElement.textContent = deployCmd;
+      console.log('[命令生成] 命令已更新到页面');
+    } else {
+      console.error('[命令生成] 错误：找不到 deployCmd 元素！');
+    }
   }
 
   // 添加事件监听器
