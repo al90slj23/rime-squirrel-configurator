@@ -928,31 +928,43 @@ end
     updatePreview();
   });
 
-  // 生成并下载 - 方案配置
-  document.getElementById('btnGenSchema').addEventListener('click', ()=>{
+  // 下载完整配置包
+  document.getElementById('btnDownload').addEventListener('click', async ()=>{
+    const zip = new JSZip();
+    const schemaName = schemaId.value || 'luna_pinyin';
+
+    // 1. 添加方案配置文件
     const yamlObj = renderYaml();
     const yamlText = jsyaml.dump(yamlObj, {lineWidth: 120});
-    const name = `${schemaId.value || 'luna_pinyin'}.custom.yaml`;
-    download(yamlText, name);
+    zip.file(`${schemaName}.custom.yaml`, yamlText);
 
-    // 如果启用了 Emoji，下载 emoji 词库
+    // 2. 添加皮肤配置文件
+    const squirrelObj = renderSquirrelYaml();
+    const squirrelText = jsyaml.dump(squirrelObj, {lineWidth: 120});
+    zip.file('squirrel.custom.yaml', squirrelText);
+
+    // 3. 如果启用了 Emoji，添加 emoji 词库
     if(enableEmoji.checked){
       const emojiDict = generateEmojiDict();
-      download(emojiDict, 'emoji.dict.yaml');
+      zip.file('emoji.dict.yaml', emojiDict);
     }
 
-    // 如果启用了农历或 Emoji，下载 rime.lua
+    // 4. 如果启用了农历或 Emoji，添加 rime.lua
     if(enableLunar.checked || enableEmoji.checked){
       const rimeLua = generateRimeLua();
-      download(rimeLua, 'rime.lua');
+      zip.file('rime.lua', rimeLua);
     }
-  });
 
-  // 生成并下载 - 皮肤配置
-  document.getElementById('btnGenSquirrel').addEventListener('click', ()=>{
-    const squirrelObj = renderSquirrelYaml();
-    const yamlText = jsyaml.dump(squirrelObj, {lineWidth: 120});
-    download(yamlText, 'squirrel.custom.yaml');
+    // 5. 生成并下载 zip 文件
+    const blob = await zip.generateAsync({type: 'blob'});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `rime-config-${schemaName}.zip`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
   });
 
   // 复制部署命令

@@ -6,6 +6,7 @@
 <title>Rime 管须鼠可视化配置器 v1.2（.custom.yaml 生成器）</title>
 <link rel="icon" type="image/svg+xml" href="favicon.svg" />
 <script src="https://cdn.jsdelivr.net/npm/js-yaml@4.1.0/dist/js-yaml.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -304,11 +305,8 @@
 
   <div class="card">
     <div class="row" style="justify-content:space-between;align-items:center;margin-bottom:16px">
-      <h2 style="margin:0">生成的 YAML 预览</h2>
-      <div style="display:flex;gap:8px">
-        <button id="btnGenSchema">⬇ 生成方案配置</button>
-        <button id="btnGenSquirrel">⬇ 生成皮肤配置</button>
-      </div>
+      <h2 style="margin:0">配置预览与下载</h2>
+      <button id="btnDownload">📦 下载完整配置包</button>
     </div>
     <div class="radio-wrap" style="margin-bottom:16px">
       <label><input type="radio" name="previewType" value="schema" checked /> 方案配置预览</label>
@@ -318,7 +316,7 @@
     <div class="hint">
       <strong>部署说明：</strong>
       <div style="margin-top:8px">
-        <strong>方式 1：</strong>将下载的文件放入 <code>~/Library/Rime/</code> 目录，然后在「鼠须管」菜单中点击「重新部署」。
+        <strong>方式 1：</strong>将下载的压缩包解压后，把所有文件放入 <code>~/Library/Rime/</code> 目录（Library 即"资源库"），然后在「鼠须管」菜单中点击「重新部署」。
       </div>
       <div style="margin-top:8px">
         <strong>方式 2：</strong>命令行快速部署
