@@ -322,11 +322,15 @@
         <strong>方式 1：</strong>将下载的压缩包解压后，把所有文件放入 <code>~/Library/Rime/</code> 目录（Library 即"资源库"），然后在「鼠须管」菜单中点击「重新部署」。
       </div>
       <div style="margin-top:8px">
-        <strong>方式 2：</strong>命令行快速部署
-        <div style="display:flex;gap:8px;margin-top:8px;align-items:center">
-          <code id="deployCmd" style="flex:1;padding:8px 12px;cursor:pointer;user-select:all">/Library/Input\ Methods/Squirrel.app/Contents/MacOS/Squirrel --reload</code>
+        <strong>方式 2：</strong>命令行一键部署（复制命令直接运行，无需下载）
+        <div style="margin-top:8px">
+          <button id="btnGenerateCmd" style="margin-bottom:8px">🔧 生成专属部署命令</button>
+        </div>
+        <div style="display:flex;gap:8px;align-items:center">
+          <code id="deployCmd" style="flex:1;padding:8px 12px;cursor:pointer;user-select:all;max-height:100px;overflow-y:auto">点击上方按钮生成命令</code>
           <button id="copyCmd" style="padding:8px 16px;font-size:12px">📋 复制</button>
         </div>
+        <div class="muted" style="margin-top:8px">生成的命令包含您的自定义配置，直接在终端运行即可完成部署</div>
       </div>
     </div>
   </div>
