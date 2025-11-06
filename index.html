@@ -306,7 +306,10 @@
   <div class="card">
     <div class="row" style="justify-content:space-between;align-items:center;margin-bottom:16px">
       <h2 style="margin:0">配置预览与下载</h2>
-      <button id="btnDownload">📦 下载完整配置包</button>
+      <div style="display:flex;gap:8px">
+        <button id="btnDownloadZip">📦 下载压缩配置包</button>
+        <button id="btnDownloadFiles">⬇ 下载完整配置</button>
+      </div>
     </div>
     <div class="radio-wrap" style="margin-bottom:16px">
       <label><input type="radio" name="previewType" value="schema" checked /> 方案配置预览</label>

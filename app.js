@@ -928,43 +928,73 @@ end
     updatePreview();
   });
 
-  // 下载完整配置包
-  document.getElementById('btnDownload').addEventListener('click', async ()=>{
-    const zip = new JSZip();
-    const schemaName = schemaId.value || 'luna_pinyin';
+  // 下载压缩配置包
+  document.getElementById('btnDownloadZip').addEventListener('click', async ()=>{
+    try {
+      const zip = new JSZip();
+      const schemaName = schemaId.value || 'luna_pinyin';
 
-    // 1. 添加方案配置文件
+      // 1. 添加方案配置文件
+      const yamlObj = renderYaml();
+      const yamlText = jsyaml.dump(yamlObj, {lineWidth: 120});
+      zip.file(`${schemaName}.custom.yaml`, yamlText);
+
+      // 2. 添加皮肤配置文件
+      const squirrelObj = renderSquirrelYaml();
+      const squirrelText = jsyaml.dump(squirrelObj, {lineWidth: 120});
+      zip.file('squirrel.custom.yaml', squirrelText);
+
+      // 3. 如果启用了 Emoji，添加 emoji 词库
+      if(enableEmoji.checked){
+        const emojiDict = generateEmojiDict();
+        zip.file('emoji.dict.yaml', emojiDict);
+      }
+
+      // 4. 如果启用了农历或 Emoji，添加 rime.lua
+      if(enableLunar.checked || enableEmoji.checked){
+        const rimeLua = generateRimeLua();
+        zip.file('rime.lua', rimeLua);
+      }
+
+      // 5. 生成并下载 zip 文件
+      const blob = await zip.generateAsync({type: 'blob'});
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `rime-config-${schemaName}.zip`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    } catch(error) {
+      console.error('下载压缩包失败:', error);
+      alert('下载失败，请检查浏览器控制台');
+    }
+  });
+
+  // 下载完整配置（分别下载多个文件）
+  document.getElementById('btnDownloadFiles').addEventListener('click', ()=>{
     const yamlObj = renderYaml();
     const yamlText = jsyaml.dump(yamlObj, {lineWidth: 120});
-    zip.file(`${schemaName}.custom.yaml`, yamlText);
+    const name = `${schemaId.value || 'luna_pinyin'}.custom.yaml`;
+    download(yamlText, name);
 
-    // 2. 添加皮肤配置文件
+    // 下载皮肤配置
     const squirrelObj = renderSquirrelYaml();
     const squirrelText = jsyaml.dump(squirrelObj, {lineWidth: 120});
-    zip.file('squirrel.custom.yaml', squirrelText);
+    download(squirrelText, 'squirrel.custom.yaml');
 
-    // 3. 如果启用了 Emoji，添加 emoji 词库
+    // 如果启用了 Emoji，下载 emoji 词库
     if(enableEmoji.checked){
       const emojiDict = generateEmojiDict();
-      zip.file('emoji.dict.yaml', emojiDict);
+      download(emojiDict, 'emoji.dict.yaml');
     }
 
-    // 4. 如果启用了农历或 Emoji，添加 rime.lua
+    // 如果启用了农历或 Emoji，下载 rime.lua
     if(enableLunar.checked || enableEmoji.checked){
       const rimeLua = generateRimeLua();
-      zip.file('rime.lua', rimeLua);
+      download(rimeLua, 'rime.lua');
     }
-
-    // 5. 生成并下载 zip 文件
-    const blob = await zip.generateAsync({type: 'blob'});
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `rime-config-${schemaName}.zip`;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
   });
 
   // 复制部署命令
