@@ -7,6 +7,7 @@ import { initDownload } from './modules/download.js';
 import { initPreview } from './modules/preview.js';
 import { initUI } from './modules/ui.js';
 import { initCommandGenerator } from './modules/command-generator.js';
+import { initSymbolEditor } from './modules/symbol-editor.js';
 
 document.addEventListener('DOMContentLoaded', () => {
   console.log('%c[Rime配置器] 完全模块化版本', 'color: #007aff; font-weight: bold');
@@ -36,6 +37,10 @@ document.addEventListener('DOMContentLoaded', () => {
     // 初始化命令生成器
     initCommandGenerator();
     console.log('✓ 命令生成器模块');
+
+    // 初始化符号编辑器
+    initSymbolEditor();
+    console.log('✓ 符号编辑器模块');
 
     console.log('%c[Rime配置器] 所有模块加载完成！', 'color: #28a745; font-weight: bold');
   } catch (error) {

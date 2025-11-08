@@ -196,17 +196,38 @@ if config.get('enableEmoji'):
     tag: emoji
 """
 
-# 配置斜杠标点（确保斜杠在第一位）
-schema_yaml += """
+# 符号配置
+if config.get('enableSymbols', True) and not config.get('symbolEnglishOnly', False):
+    symbol_config = config.get('symbolConfig', {})
+
+    if symbol_config:
+        # 半角符号配置
+        schema_yaml += "\n  punctuator/half_shape:\n"
+        for key, cfg in symbol_config.items():
+            if cfg.get('half'):
+                symbols = ', '.join(cfg['half'])
+                # 转义特殊字符
+                key_escaped = key.replace('\\', '\\\\').replace('"', '\\"')
+                schema_yaml += f'    "{key_escaped}": [{symbols}]\n'
+
+        # 全角符号配置
+        schema_yaml += "\n  punctuator/full_shape:\n"
+        for key, cfg in symbol_config.items():
+            if cfg.get('full'):
+                symbols = ', '.join(cfg['full'])
+                # 转义特殊字符
+                key_escaped = key.replace('\\', '\\\\').replace('"', '\\"')
+                schema_yaml += f'    "{key_escaped}": [{symbols}]\n'
+    else:
+        # 使用默认配置
+        schema_yaml += """
   punctuator/half_shape:
     /: [/, ／, \\, ÷, 、]
 """
 
-# 符号输入
-if config.get('enableSymbols', True):
+    # 额外的符号快捷输入（保留原有的 /xxx 快捷方式）
     schema_yaml += """
   punctuator/symbols:
-    /: [/, ／, \\, ÷]
     /blx: [~, ～, 〜, ∼, ≈, ≋, ≃, ≅, ⁓, 〰]
     /ydy: [≈]
     /zs: [↑, ↓, ←, →, ↖, ↗, ↙, ↘, ↔, ↕]

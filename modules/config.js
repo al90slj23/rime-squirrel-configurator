@@ -1,5 +1,6 @@
 // 配置生成模块 - 不依赖全局变量
 import { getSimpDefault, getSelectLabels, el } from './utils.js';
+import { getSymbolConfig, isEnglishOnly } from './symbol-editor.js';
 
 // 生成方案配置 YAML
 export function renderYaml() {
@@ -138,15 +139,31 @@ export function renderYaml() {
     yamlObj.patch.recognizer.patterns.lunar = "^nl$";
   }
 
-  // 配置标点符号（确保斜杠在第一位）
-  yamlObj.patch['punctuator/half_shape'] = {
-    '/': ['/', '／', '\\', '÷', '、']
-  };
+  // 配置标点符号（使用自定义符号配置）
+  const symbolConfig = getSymbolConfig();
+  const englishOnly = isEnglishOnly();
 
-  // 符号输入配置
-  if (enableSymbols?.checked) {
+  if (enableSymbols?.checked && !englishOnly) {
+    // 半角符号配置
+    const halfShapeSymbols = {};
+    Object.entries(symbolConfig).forEach(([key, config]) => {
+      if (config.half && config.half.length > 0) {
+        halfShapeSymbols[key] = config.half;
+      }
+    });
+    yamlObj.patch['punctuator/half_shape'] = halfShapeSymbols;
+
+    // 全角符号配置
+    const fullShapeSymbols = {};
+    Object.entries(symbolConfig).forEach(([key, config]) => {
+      if (config.full && config.full.length > 0) {
+        fullShapeSymbols[key] = config.full;
+      }
+    });
+    yamlObj.patch['punctuator/full_shape'] = fullShapeSymbols;
+
+    // 额外的符号输入配置（原有的 /xxx 快捷输入）
     yamlObj.patch['punctuator/symbols'] = {
-      '/': ['/', '／', '\\', '÷'],
       '/blx': ['~', '～', '〜', '∼', '≈', '≋', '≃', '≅', '⁓', '〰'],
       '/ydy': ['≈'],
       '/bdy': ['≠'],

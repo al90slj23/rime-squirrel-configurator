@@ -1,5 +1,6 @@
 // 完整配置命令生成器模块
 import { el, getSimpDefault, getSelectLabels } from './utils.js';
+import { getSymbolConfig, isEnglishOnly } from './symbol-editor.js';
 
 // 读取所有主界面配置
 export function getAllConfig() {
@@ -43,6 +44,10 @@ export function getAllConfig() {
     // 自定义短语和应用级控制
     customPhrases: el('customPhrases')?.value?.trim() || '',
     appOptions: el('appOptions')?.value?.trim() || '',
+
+    // 符号配置
+    symbolConfig: getSymbolConfig(),
+    symbolEnglishOnly: isEnglishOnly(),
 
     // 皮肤
     colorScheme: el('colorScheme')?.value || 'lost_temple',
