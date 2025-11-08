@@ -20,6 +20,8 @@ export function renderYaml() {
   const enableEmoji = el('enableEmoji');
   const enableLunar = el('enableLunar');
   const enableSymbols = el('enableSymbols');
+  const customPhrases = el('customPhrases');
+  const appOptions = el('appOptions');
 
   const hk = (hotkey?.value || '').split(',').map(s => s.trim()).filter(Boolean);
 
@@ -160,7 +162,66 @@ export function renderYaml() {
     };
   }
 
+  // 应用级控制配置
+  if (appOptions?.value?.trim()) {
+    const appList = appOptions.value.trim().split('\n')
+      .map(line => line.trim())
+      .filter(line => line && !line.startsWith('#'));
+
+    if (appList.length > 0) {
+      yamlObj.patch.app_options = {};
+      appList.forEach(bundleId => {
+        yamlObj.patch.app_options[bundleId] = { ascii_mode: true };
+      });
+    }
+  }
+
   return yamlObj;
+}
+
+// 生成自定义短语文本（custom_phrase.txt 格式）
+export function generateCustomPhrases() {
+  const customPhrases = el('customPhrases');
+  if (!customPhrases?.value?.trim()) {
+    return '';
+  }
+
+  const lines = customPhrases.value.trim().split('\n')
+    .map(line => line.trim())
+    .filter(line => line && !line.startsWith('#'));
+
+  if (lines.length === 0) {
+    return '';
+  }
+
+  // custom_phrase.txt 格式：
+  // # Rime table
+  // # coding: utf-8
+  // #@/db_name custom_phrase.txt
+  // #@/db_type tabledb
+  //
+  // 文本内容<tab>编码
+
+  let result = '# Rime table\n';
+  result += '# coding: utf-8\n';
+  result += '#@/db_name custom_phrase.txt\n';
+  result += '#@/db_type tabledb\n';
+  result += '\n';
+
+  lines.forEach(line => {
+    // 用户输入格式：编码<tab>文本
+    // custom_phrase.txt 格式：文本<tab>编码
+    const parts = line.split('\t');
+    if (parts.length >= 2) {
+      const code = parts[0].trim();
+      const text = parts[1].trim();
+      if (code && text) {
+        result += `${text}\t${code}\n`;
+      }
+    }
+  });
+
+  return result;
 }
 
 // 生成皮肤配置 YAML

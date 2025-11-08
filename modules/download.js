@@ -1,6 +1,6 @@
 // 下载功能模块
 import { el, download } from './utils.js';
-import { renderYaml, renderSquirrelYaml, generateEmojiDict, generateRimeLua } from './config.js';
+import { renderYaml, renderSquirrelYaml, generateEmojiDict, generateRimeLua, generateCustomPhrases } from './config.js';
 
 // 初始化下载功能
 export function initDownload() {
@@ -40,7 +40,13 @@ export function initDownload() {
           zip.file('rime.lua', rimeLua);
         }
 
-        // 5. 生成并下载 zip 文件
+        // 5. 添加自定义短语文件（如果有内容）
+        const customPhrasesText = generateCustomPhrases();
+        if (customPhrasesText) {
+          zip.file('custom_phrase.txt', customPhrasesText);
+        }
+
+        // 6. 生成并下载 zip 文件
         const blob = await zip.generateAsync({ type: 'blob' });
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
@@ -95,6 +101,14 @@ export function initDownload() {
             const rimeLua = generateRimeLua();
             download(rimeLua, 'rime.lua');
           }, 600);
+        }
+
+        // 5. 下载自定义短语（如果有内容）
+        const customPhrasesText = generateCustomPhrases();
+        if (customPhrasesText) {
+          setTimeout(() => {
+            download(customPhrasesText, 'custom_phrase.txt');
+          }, 800);
         }
 
         console.log('[下载] 所有文件下载完成');

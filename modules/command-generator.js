@@ -40,6 +40,10 @@ export function getAllConfig() {
     enableLunar: el('enableLunar')?.checked !== false,
     enableSymbols: el('enableSymbols')?.checked !== false,
 
+    // 自定义短语和应用级控制
+    customPhrases: el('customPhrases')?.value?.trim() || '',
+    appOptions: el('appOptions')?.value?.trim() || '',
+
     // 皮肤
     colorScheme: el('colorScheme')?.value || 'lost_temple',
     colorSchemeDark: el('colorSchemeDark')?.value || 'nord',

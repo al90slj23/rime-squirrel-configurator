@@ -219,6 +219,53 @@
   </div>
 
   <div class="card">
+    <h2 style="margin:0 0 24px">✏️ 自定义短语管理 <span class="badge">custom_phrase.txt</span></h2>
+    <div class="section">
+      <p class="muted" style="margin:0 0 16px">
+        快速输入常用短语，提高输入效率。例如输入 <code>email</code> 显示您的邮箱地址，输入 <code>phone</code> 显示手机号。
+      </p>
+
+      <label style="flex-direction:column;align-items:flex-start;margin-bottom:12px">
+        <span class="label-text" style="margin-bottom:8px;font-weight:600">自定义短语列表</span>
+        <textarea id="customPhrases" placeholder="格式：编码&#9;短语文本&#10;&#10;示例：&#10;email&#9;your.email@example.com&#10;phone&#9;13800138000&#10;addr&#9;北京市朝阳区&#10;sign&#9;此致敬礼&#10;&#10;每行一个短语，用 Tab 键分隔编码和文本" style="width:100%;min-height:200px;font-family:'SF Mono',Monaco,Consolas,monospace;font-size:13px"></textarea>
+      </label>
+
+      <div class="hint" style="margin-top:12px">
+        <strong>💡 使用说明：</strong>
+        <ul style="margin:8px 0 0 20px;padding:0">
+          <li>每行一个短语，格式：<code>编码[Tab键]文本内容</code></li>
+          <li>编码可以是拼音、英文、数字等</li>
+          <li>支持中文、英文、数字、符号等任意文本</li>
+          <li>常用场景：邮箱、手机、地址、签名、常用语句等</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2 style="margin:0 0 24px">🎯 应用级控制 <span class="badge">app_options</span></h2>
+    <div class="section">
+      <p class="muted" style="margin:0 0 16px">
+        为特定应用设置默认输入模式。例如在终端或代码编辑器中自动切换到英文模式。
+      </p>
+
+      <label style="flex-direction:column;align-items:flex-start;margin-bottom:12px">
+        <span class="label-text" style="margin-bottom:8px;font-weight:600">应用 Bundle ID 列表</span>
+        <textarea id="appOptions" placeholder="格式：Bundle ID（每行一个）&#10;&#10;常用示例：&#10;com.apple.Terminal&#10;com.microsoft.VSCode&#10;com.googlecode.iterm2&#10;com.jetbrains.intellij&#10;org.vim.MacVim&#10;&#10;这些应用将默认使用英文输入模式" style="width:100%;min-height:150px;font-family:'SF Mono',Monaco,Consolas,monospace;font-size:13px"></textarea>
+      </label>
+
+      <div class="hint" style="margin-top:12px">
+        <strong>💡 如何获取 Bundle ID？</strong>
+        <ul style="margin:8px 0 0 20px;padding:0">
+          <li>打开"活动监视器"，找到应用，查看"Bundle ID"列</li>
+          <li>或在终端运行：<code>osascript -e 'id of app "应用名称"'</code></li>
+          <li>常用开发工具已为您预设在示例中</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
     <h2 style="margin:0 0 24px">🎨 鼠须管皮肤配置 <span class="badge">squirrel.custom.yaml</span></h2>
     <div class="grid">
       <div class="section">

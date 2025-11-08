@@ -202,6 +202,15 @@ if config.get('enableSymbols', True):
     /zs: [↑, ↓, ←, →, ↖, ↗, ↙, ↘, ↔, ↕]
 """
 
+# 应用级控制
+if config.get('appOptions'):
+    app_list = [line.strip() for line in config['appOptions'].split('\n') if line.strip() and not line.strip().startswith('#')]
+    if app_list:
+        schema_yaml += "\n  app_options:\n"
+        for bundle_id in app_list:
+            schema_yaml += f"    {bundle_id}:\n"
+            schema_yaml += "      ascii_mode: true\n"
+
 # 写入方案配置
 schema_file = os.path.join(rime_dir, f"{schema}.custom.yaml")
 with open(schema_file, 'w', encoding='utf-8') as f:
@@ -271,6 +280,32 @@ end
     with open(lua_file, 'w', encoding='utf-8') as f:
         f.write(rime_lua)
     print("🔧 写入 Lua 脚本: rime.lua")
+
+# 自定义短语
+if config.get('customPhrases'):
+    custom_phrases = config['customPhrases'].strip()
+    if custom_phrases:
+        # 解析自定义短语，格式：编码<tab>文本
+        # custom_phrase.txt 格式：文本<tab>编码
+        custom_phrase_txt = "# Rime table\n"
+        custom_phrase_txt += "# coding: utf-8\n"
+        custom_phrase_txt += "#@/db_name custom_phrase.txt\n"
+        custom_phrase_txt += "#@/db_type tabledb\n\n"
+
+        for line in custom_phrases.split('\n'):
+            line = line.strip()
+            if line and not line.startswith('#'):
+                parts = line.split('\t')
+                if len(parts) >= 2:
+                    code = parts[0].strip()
+                    text = parts[1].strip()
+                    if code and text:
+                        custom_phrase_txt += f"{text}\t{code}\n"
+
+        custom_phrase_file = os.path.join(rime_dir, "custom_phrase.txt")
+        with open(custom_phrase_file, 'w', encoding='utf-8') as f:
+            f.write(custom_phrase_txt)
+        print("✏️ 写入自定义短语: custom_phrase.txt")
 
 PYTHON_EOF
 
