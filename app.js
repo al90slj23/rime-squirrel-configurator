@@ -42,6 +42,20 @@ document.addEventListener('DOMContentLoaded', () => {
     initSymbolEditor();
     console.log('✓ 符号编辑器模块');
 
+    // 测试按钮是否可点击
+    setTimeout(() => {
+      const testBtn = document.getElementById('btnConfigSymbols');
+      if (testBtn) {
+        console.log('[测试] 符号配置按钮存在');
+        // 添加一个额外的点击监听器用于调试
+        testBtn.addEventListener('click', () => {
+          console.log('[测试] 符号配置按钮被点击了！');
+        });
+      } else {
+        console.error('[测试] 符号配置按钮未找到');
+      }
+    }, 100);
+
     console.log('%c[Rime配置器] 所有模块加载完成！', 'color: #28a745; font-weight: bold');
   } catch (error) {
     console.error('%c[Rime配置器] 初始化失败:', 'color: #dc3545; font-weight: bold', error);

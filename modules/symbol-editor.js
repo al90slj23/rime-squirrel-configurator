@@ -42,110 +42,158 @@ let currentSymbolConfig = JSON.parse(localStorage.getItem('symbolConfig') || JSO
 
 // 初始化符号编辑器
 export function initSymbolEditor() {
-  const btnConfig = el('btnConfigSymbols');
-  const modal = el('symbolModal');
-  const closeBtn = el('closeSymbolModal');
-  const cancelBtn = el('cancelSymbols');
-  const saveBtn = el('saveSymbols');
-  const resetBtn = el('resetSymbols');
-  const importBtn = el('importSymbols');
-  const exportBtn = el('exportSymbols');
-  const englishOnlyCheckbox = el('englishOnly');
+  console.log('[符号编辑器] 开始初始化');
 
-  if (!btnConfig || !modal) return;
+  try {
+    const btnConfig = el('btnConfigSymbols');
+    const modal = el('symbolModal');
+    const closeBtn = el('closeSymbolModal');
+    const cancelBtn = el('cancelSymbols');
+    const saveBtn = el('saveSymbols');
+    const resetBtn = el('resetSymbols');
+    const importBtn = el('importSymbols');
+    const exportBtn = el('exportSymbols');
+    const englishOnlyCheckbox = el('englishOnly');
 
-  // 打开弹窗
-  btnConfig.addEventListener('click', () => {
-    modal.style.display = 'block';
-    renderSymbolTable();
-  });
+    console.log('[符号编辑器] 按钮元素:', btnConfig);
+    console.log('[符号编辑器] 弹窗元素:', modal);
 
-  // 关闭弹窗
-  const closeModal = () => {
-    modal.style.display = 'none';
-  };
-
-  closeBtn.addEventListener('click', closeModal);
-  cancelBtn.addEventListener('click', closeModal);
-
-  // 点击背景关闭
-  modal.addEventListener('click', (e) => {
-    if (e.target === modal) {
-      closeModal();
+    if (!btnConfig) {
+      console.error('[符号编辑器] 配置按钮未找到 (btnConfigSymbols)');
+      return;
     }
-  });
 
-  // 保存配置
-  saveBtn.addEventListener('click', () => {
-    saveSymbolConfig();
-    closeModal();
-  });
+    if (!modal) {
+      console.error('[符号编辑器] 弹窗元素未找到 (symbolModal)');
+      return;
+    }
 
-  // 恢复默认
-  resetBtn.addEventListener('click', () => {
-    if (confirm('确定要恢复默认符号配置吗？')) {
-      currentSymbolConfig = JSON.parse(JSON.stringify(defaultSymbolConfig));
-      localStorage.setItem('symbolConfig', JSON.stringify(currentSymbolConfig));
+    // 打开弹窗
+    btnConfig.addEventListener('click', (e) => {
+      console.log('[符号编辑器] 点击了配置按钮', e);
+      e.preventDefault(); // 防止默认行为
+      e.stopPropagation(); // 防止事件冒泡
+
+      console.log('[符号编辑器] 准备显示弹窗...');
+      modal.style.display = 'block';
+
+      console.log('[符号编辑器] 开始渲染符号表格...');
       renderSymbolTable();
+
+      console.log('[符号编辑器] 弹窗已显示');
+    });
+
+    console.log('[符号编辑器] 点击事件已绑定');
+
+    // 关闭弹窗
+    const closeModal = () => {
+      modal.style.display = 'none';
+    };
+
+    if (closeBtn) closeBtn.addEventListener('click', closeModal);
+    if (cancelBtn) cancelBtn.addEventListener('click', closeModal);
+
+    // 点击背景关闭
+    modal.addEventListener('click', (e) => {
+      if (e.target === modal) {
+        closeModal();
+      }
+    });
+
+    // 保存配置
+    if (saveBtn) {
+      saveBtn.addEventListener('click', () => {
+        saveSymbolConfig();
+        closeModal();
+      });
     }
-  });
 
-  // 导出配置
-  exportBtn.addEventListener('click', () => {
-    const configStr = JSON.stringify(currentSymbolConfig, null, 2);
-    const blob = new Blob([configStr], { type: 'application/json' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = 'symbol-config.json';
-    a.click();
-    URL.revokeObjectURL(url);
-  });
+    // 恢复默认
+    if (resetBtn) {
+      resetBtn.addEventListener('click', () => {
+        if (confirm('确定要恢复默认符号配置吗？')) {
+          currentSymbolConfig = JSON.parse(JSON.stringify(defaultSymbolConfig));
+          localStorage.setItem('symbolConfig', JSON.stringify(currentSymbolConfig));
+          renderSymbolTable();
+        }
+      });
+    }
 
-  // 导入配置
-  importBtn.addEventListener('click', () => {
-    const input = document.createElement('input');
-    input.type = 'file';
-    input.accept = '.json';
-    input.onchange = (e) => {
-      const file = e.target.files[0];
-      if (file) {
-        const reader = new FileReader();
-        reader.onload = (e) => {
-          try {
-            const config = JSON.parse(e.target.result);
-            currentSymbolConfig = config;
-            localStorage.setItem('symbolConfig', JSON.stringify(config));
-            renderSymbolTable();
-            alert('符号配置导入成功！');
-          } catch (err) {
-            alert('配置文件格式错误！');
+    // 导出配置
+    if (exportBtn) {
+      exportBtn.addEventListener('click', () => {
+        const configStr = JSON.stringify(currentSymbolConfig, null, 2);
+        const blob = new Blob([configStr], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'symbol-config.json';
+        a.click();
+        URL.revokeObjectURL(url);
+      });
+    }
+
+    // 导入配置
+    if (importBtn) {
+      importBtn.addEventListener('click', () => {
+        const input = document.createElement('input');
+        input.type = 'file';
+        input.accept = '.json';
+        input.onchange = (e) => {
+          const file = e.target.files[0];
+          if (file) {
+            const reader = new FileReader();
+            reader.onload = (e) => {
+              try {
+                const config = JSON.parse(e.target.result);
+                currentSymbolConfig = config;
+                localStorage.setItem('symbolConfig', JSON.stringify(config));
+                renderSymbolTable();
+                alert('符号配置导入成功！');
+              } catch (err) {
+                alert('配置文件格式错误！');
+              }
+            };
+            reader.readAsText(file);
           }
         };
-        reader.readAsText(file);
-      }
-    };
-    input.click();
-  });
+        input.click();
+      });
+    }
 
-  // 只使用英文符号
-  englishOnlyCheckbox.addEventListener('change', () => {
-    const isChecked = englishOnlyCheckbox.checked;
-    const inputs = document.querySelectorAll('#symbolTableBody input[type="text"]');
-    inputs.forEach(input => {
-      input.disabled = isChecked;
-    });
-  });
+    // 只使用英文符号
+    if (englishOnlyCheckbox) {
+      englishOnlyCheckbox.addEventListener('change', () => {
+        const isChecked = englishOnlyCheckbox.checked;
+        const inputs = document.querySelectorAll('#symbolTableBody input[type="text"]');
+        inputs.forEach(input => {
+          input.disabled = isChecked;
+        });
+      });
+    }
+
+    console.log('[符号编辑器] 初始化完成');
+
+  } catch (error) {
+    console.error('[符号编辑器] 初始化失败:', error);
+    console.error('[符号编辑器] 错误堆栈:', error.stack);
+  }
 }
 
 // 渲染符号表格
 function renderSymbolTable() {
-  const tbody = el('symbolTableBody');
-  if (!tbody) return;
+  console.log('[符号编辑器] 开始渲染符号表格');
 
-  tbody.innerHTML = '';
+  try {
+    const tbody = el('symbolTableBody');
+    if (!tbody) {
+      console.error('[符号编辑器] 表格元素未找到 (symbolTableBody)');
+      return;
+    }
 
-  Object.entries(currentSymbolConfig).forEach(([key, config]) => {
+    tbody.innerHTML = '';
+
+    Object.entries(currentSymbolConfig).forEach(([key, config]) => {
     const tr = document.createElement('tr');
 
     // 成对符号使用绿色背景
@@ -178,8 +226,15 @@ function renderSymbolTable() {
       </td>
     `;
 
-    tbody.appendChild(tr);
-  });
+      tbody.appendChild(tr);
+    });
+
+    console.log('[符号编辑器] 符号表格渲染完成');
+
+  } catch (error) {
+    console.error('[符号编辑器] 渲染符号表格失败:', error);
+    console.error('[符号编辑器] 错误堆栈:', error.stack);
+  }
 }
 
 // 保存符号配置
