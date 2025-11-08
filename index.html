@@ -70,9 +70,9 @@
           </div>
         </div>
 
-        <div style="display:flex;flex-wrap:wrap;gap:16px;margin-bottom:16px">
+        <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:16px;margin-bottom:16px">
           <!-- Card 1: 切换输入法 -->
-          <div style="flex:1 1 calc(50% - 8px);min-width:300px;padding:16px;background:var(--input-bg);border:1px solid var(--border);border-radius:8px">
+          <div style="padding:16px;background:var(--input-bg);border:1px solid var(--border);border-radius:8px">
             <div class="label-text" style="margin-bottom:8px;font-weight:600">切换输入法</div>
             <div style="display:flex;gap:8px;align-items:center">
               <input id="hotkeySwitch" type="text" value="Control+Shift" placeholder="Control+Shift" style="flex:1" />
@@ -82,7 +82,7 @@
           </div>
 
           <!-- Card 2: 中英文切换 -->
-          <div style="flex:1 1 calc(50% - 8px);min-width:300px;padding:16px;background:var(--input-bg);border:1px solid var(--border);border-radius:8px">
+          <div style="padding:16px;background:var(--input-bg);border:1px solid var(--border);border-radius:8px">
             <div class="label-text" style="margin-bottom:8px;font-weight:600">中英文切换</div>
             <div style="display:flex;gap:8px;align-items:center">
               <input id="hotkeyAscii" type="text" value="Shift_L" placeholder="Shift_L" style="flex:1" />
@@ -92,7 +92,7 @@
           </div>
 
           <!-- Card 3: 大小写切换 -->
-          <div style="flex:1 1 calc(50% - 8px);min-width:300px;padding:16px;background:var(--input-bg);border:1px solid var(--border);border-radius:8px">
+          <div style="padding:16px;background:var(--input-bg);border:1px solid var(--border);border-radius:8px">
             <div class="label-text" style="margin-bottom:8px;font-weight:600">大小写切换</div>
             <div style="display:flex;gap:8px;align-items:center">
               <input id="hotkeyCapsLock" type="text" value="Caps_Lock" placeholder="Caps_Lock" style="flex:1" />
@@ -102,7 +102,7 @@
           </div>
 
           <!-- Card 4: 全角半角切换 -->
-          <div style="flex:1 1 calc(50% - 8px);min-width:300px;padding:16px;background:var(--input-bg);border:1px solid var(--border);border-radius:8px">
+          <div style="padding:16px;background:var(--input-bg);border:1px solid var(--border);border-radius:8px">
             <div class="label-text" style="margin-bottom:8px;font-weight:600">全角半角切换</div>
             <div style="display:flex;gap:8px;align-items:center">
               <input id="hotkeyFullShape" type="text" value="Control+space" placeholder="Control+space" style="flex:1" />
@@ -112,7 +112,7 @@
           </div>
 
           <!-- Card 5: 简繁切换 -->
-          <div style="flex:1 1 calc(50% - 8px);min-width:300px;padding:16px;background:var(--input-bg);border:1px solid var(--border);border-radius:8px">
+          <div style="padding:16px;background:var(--input-bg);border:1px solid var(--border);border-radius:8px">
             <div class="label-text" style="margin-bottom:8px;font-weight:600">简繁切换</div>
             <div style="display:flex;gap:8px;align-items:center">
               <input id="hotkey" type="text" value="Control+Shift+F" placeholder="Control+Shift+F" style="flex:1" />
