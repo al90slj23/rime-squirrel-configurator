@@ -99,8 +99,8 @@ export function renderYaml() {
     yamlObj.patch.recognizer = { patterns };
   }
 
-  // Emoji 和农历支持的引擎配置
-  if (enableEmoji?.checked || enableLunar?.checked) {
+  // 引擎配置 - 需要 punct_translator 来处理符号输入
+  if (enableSymbols?.checked || enableEmoji?.checked || enableLunar?.checked) {
     const translators = ['punct_translator', 'script_translator'];
 
     if (enableEmoji?.checked) {

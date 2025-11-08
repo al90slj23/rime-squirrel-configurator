@@ -173,8 +173,8 @@ if patterns or config.get('enableLunar'):
         schema_yaml += "      date: \"^rq$\"\n"
         schema_yaml += "      lunar: \"^nl$\"\n"
 
-# Emoji/农历引擎
-if config.get('enableEmoji') or config.get('enableLunar'):
+# 引擎配置 - 需要 punct_translator 来处理符号输入
+if config.get('enableSymbols', True) or config.get('enableEmoji') or config.get('enableLunar'):
     schema_yaml += "\n  engine/translators:\n"
     schema_yaml += "    - punct_translator\n"
     schema_yaml += "    - script_translator\n"
