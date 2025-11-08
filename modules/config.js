@@ -132,10 +132,15 @@ export function renderYaml() {
     yamlObj.patch.recognizer.patterns.lunar = "^nl$";
   }
 
+  // 配置标点符号（确保斜杠在第一位）
+  yamlObj.patch['punctuator/half_shape'] = {
+    '/': ['/', '／', '\\', '÷', '、']
+  };
+
   // 符号输入配置
   if (enableSymbols?.checked) {
     yamlObj.patch['punctuator/symbols'] = {
-      '/': ['/', '／', '、', '\\'],
+      '/': ['/', '／', '\\', '÷'],
       '/blx': ['~', '～', '〜', '∼', '≈', '≋', '≃', '≅', '⁓', '〰'],
       '/ydy': ['≈'],
       '/bdy': ['≠'],

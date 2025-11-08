@@ -193,11 +193,17 @@ if config.get('enableEmoji'):
     tag: emoji
 """
 
+# 配置斜杠标点（确保斜杠在第一位）
+schema_yaml += """
+  punctuator/half_shape:
+    /: [/, ／, \\, ÷, 、]
+"""
+
 # 符号输入
 if config.get('enableSymbols', True):
     schema_yaml += """
   punctuator/symbols:
-    /: [/, ／, 、, \\]
+    /: [/, ／, \\, ÷]
     /blx: [~, ～, 〜, ∼, ≈, ≋, ≃, ≅, ⁓, 〰]
     /ydy: [≈]
     /zs: [↑, ↓, ←, →, ↖, ↗, ↙, ↘, ↔, ↕]
