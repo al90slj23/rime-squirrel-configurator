@@ -55,79 +55,78 @@
           <span class="label-text">默认「中文标点」</span>
         </label>
       </div>
-
-      <div class="section">
-        <h2>快捷键配置</h2>
-
-        <div style="margin-bottom:24px">
-          <div style="margin-bottom:12px">
-            <span style="font-weight:600;font-size:14px">快捷键风格</span>
-          </div>
-          <div class="radio-wrap" style="display:flex;gap:20px;width:100%">
-            <label style="margin:0"><input type="radio" name="hotkeyStyle" value="windows" checked /> Windows</label>
-            <label style="margin:0"><input type="radio" name="hotkeyStyle" value="macos" /> macOS</label>
-            <label style="margin:0"><input type="radio" name="hotkeyStyle" value="custom" /> 自定义</label>
-          </div>
-        </div>
-
-        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:16px;margin-bottom:16px">
-          <!-- Card 1: 切换输入法 -->
-          <div style="padding:16px;background:var(--input-bg);border:1px solid var(--border);border-radius:8px">
-            <div class="label-text" style="margin-bottom:8px;font-weight:600">切换输入法</div>
-            <div style="display:flex;gap:8px;align-items:center">
-              <input id="hotkeySwitch" type="text" value="Control+Shift" placeholder="Control+Shift" style="flex:1" />
-              <button class="record-btn" data-target="hotkeySwitch" style="padding:10px 16px;white-space:nowrap">录制</button>
-            </div>
-            <div class="muted" style="margin-top:8px;font-size:13px">轮换切换不同的输入方案</div>
-          </div>
-
-          <!-- Card 2: 中英文切换 -->
-          <div style="padding:16px;background:var(--input-bg);border:1px solid var(--border);border-radius:8px">
-            <div class="label-text" style="margin-bottom:8px;font-weight:600">中英文切换</div>
-            <div style="display:flex;gap:8px;align-items:center">
-              <input id="hotkeyAscii" type="text" value="Shift_L" placeholder="Shift_L" style="flex:1" />
-              <button class="record-btn" data-target="hotkeyAscii" style="padding:10px 16px;white-space:nowrap">录制</button>
-            </div>
-            <div class="muted" style="margin-top:8px;font-size:13px">在中文和英文模式之间切换</div>
-          </div>
-
-          <!-- Card 3: 大小写切换 -->
-          <div style="padding:16px;background:var(--input-bg);border:1px solid var(--border);border-radius:8px">
-            <div class="label-text" style="margin-bottom:8px;font-weight:600">大小写切换</div>
-            <div style="display:flex;gap:8px;align-items:center">
-              <input id="hotkeyCapsLock" type="text" value="Caps_Lock" placeholder="Caps_Lock" style="flex:1" />
-              <button class="record-btn" data-target="hotkeyCapsLock" style="padding:10px 16px;white-space:nowrap">录制</button>
-            </div>
-            <div class="muted" style="margin-top:8px;font-size:13px">切换大小写锁定</div>
-          </div>
-
-          <!-- Card 4: 全角半角切换 -->
-          <div style="padding:16px;background:var(--input-bg);border:1px solid var(--border);border-radius:8px">
-            <div class="label-text" style="margin-bottom:8px;font-weight:600">全角半角切换</div>
-            <div style="display:flex;gap:8px;align-items:center">
-              <input id="hotkeyFullShape" type="text" value="Control+space" placeholder="Control+space" style="flex:1" />
-              <button class="record-btn" data-target="hotkeyFullShape" style="padding:10px 16px;white-space:nowrap">录制</button>
-            </div>
-            <div class="muted" style="margin-top:8px;font-size:13px">在全角和半角字符之间切换</div>
-          </div>
-
-          <!-- Card 5: 简繁切换 -->
-          <div style="padding:16px;background:var(--input-bg);border:1px solid var(--border);border-radius:8px">
-            <div class="label-text" style="margin-bottom:8px;font-weight:600">简繁切换</div>
-            <div style="display:flex;gap:8px;align-items:center">
-              <input id="hotkey" type="text" value="Control+Shift+F" placeholder="Control+Shift+F" style="flex:1" />
-              <button class="record-btn" data-target="hotkey" style="padding:10px 16px;white-space:nowrap">录制</button>
-            </div>
-            <div class="muted" style="margin-top:8px;font-size:13px">在简体和繁体之间切换</div>
-          </div>
-        </div>
-
-        <div class="muted" style="margin-top:12px;padding:8px;background:var(--input-bg);border-radius:4px">
-          💡 提示：点击"录制"按钮后按下快捷键，或手动输入。多组热键用逗号分隔。
-        </div>
-      </div>
     </div>
   </div>
+
+  <div class="card">
+    <h2 style="margin:0 0 24px">快捷键配置</h2>
+
+    <div style="margin-bottom:24px">
+      <div style="margin-bottom:12px">
+        <span style="font-weight:600;font-size:14px">快捷键风格</span>
+      </div>
+      <div class="radio-wrap" style="display:flex;gap:20px;width:100%">
+        <label style="margin:0"><input type="radio" name="hotkeyStyle" value="windows" checked /> Windows</label>
+        <label style="margin:0"><input type="radio" name="hotkeyStyle" value="macos" /> macOS</label>
+        <label style="margin:0"><input type="radio" name="hotkeyStyle" value="custom" /> 自定义</label>
+      </div>
+    </div>
+
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:16px;margin-bottom:16px">
+      <!-- Card 1: 切换输入法 -->
+      <div style="padding:16px;background:var(--input-bg);border:1px solid var(--border);border-radius:8px">
+        <div class="label-text" style="margin-bottom:8px;font-weight:600">切换输入法</div>
+        <div style="display:flex;gap:8px;align-items:center">
+          <input id="hotkeySwitch" type="text" value="Control+Shift" placeholder="Control+Shift" style="flex:1" />
+          <button class="record-btn" data-target="hotkeySwitch" style="padding:10px 16px;white-space:nowrap">录制</button>
+        </div>
+        <div class="muted" style="margin-top:8px;font-size:13px">轮换切换不同的输入方案</div>
+      </div>
+
+      <!-- Card 2: 中英文切换 -->
+      <div style="padding:16px;background:var(--input-bg);border:1px solid var(--border);border-radius:8px">
+        <div class="label-text" style="margin-bottom:8px;font-weight:600">中英文切换</div>
+        <div style="display:flex;gap:8px;align-items:center">
+          <input id="hotkeyAscii" type="text" value="Shift_L" placeholder="Shift_L" style="flex:1" />
+          <button class="record-btn" data-target="hotkeyAscii" style="padding:10px 16px;white-space:nowrap">录制</button>
+        </div>
+        <div class="muted" style="margin-top:8px;font-size:13px">在中文和英文模式之间切换</div>
+      </div>
+
+      <!-- Card 3: 大小写切换 -->
+      <div style="padding:16px;background:var(--input-bg);border:1px solid var(--border);border-radius:8px">
+        <div class="label-text" style="margin-bottom:8px;font-weight:600">大小写切换</div>
+        <div style="display:flex;gap:8px;align-items:center">
+          <input id="hotkeyCapsLock" type="text" value="Caps_Lock" placeholder="Caps_Lock" style="flex:1" />
+          <button class="record-btn" data-target="hotkeyCapsLock" style="padding:10px 16px;white-space:nowrap">录制</button>
+        </div>
+        <div class="muted" style="margin-top:8px;font-size:13px">切换大小写锁定</div>
+      </div>
+
+      <!-- Card 4: 全角半角切换 -->
+      <div style="padding:16px;background:var(--input-bg);border:1px solid var(--border);border-radius:8px">
+        <div class="label-text" style="margin-bottom:8px;font-weight:600">全角半角切换</div>
+        <div style="display:flex;gap:8px;align-items:center">
+          <input id="hotkeyFullShape" type="text" value="Control+space" placeholder="Control+space" style="flex:1" />
+          <button class="record-btn" data-target="hotkeyFullShape" style="padding:10px 16px;white-space:nowrap">录制</button>
+        </div>
+        <div class="muted" style="margin-top:8px;font-size:13px">在全角和半角字符之间切换</div>
+      </div>
+
+      <!-- Card 5: 简繁切换 -->
+      <div style="padding:16px;background:var(--input-bg);border:1px solid var(--border);border-radius:8px">
+        <div class="label-text" style="margin-bottom:8px;font-weight:600">简繁切换</div>
+        <div style="display:flex;gap:8px;align-items:center">
+          <input id="hotkey" type="text" value="Control+Shift+F" placeholder="Control+Shift+F" style="flex:1" />
+          <button class="record-btn" data-target="hotkey" style="padding:10px 16px;white-space:nowrap">录制</button>
+        </div>
+        <div class="muted" style="margin-top:8px;font-size:13px">在简体和繁体之间切换</div>
+      </div>
+    </div>
+
+    <div class="muted" style="margin-top:12px;padding:8px;background:var(--input-bg);border-radius:4px">
+      💡 提示：点击"录制"按钮后按下快捷键，或手动输入。多组热键用逗号分隔。
+    </div>
 
   <div class="card">
     <h2 style="margin:0 0 24px">候选词设置</h2>
