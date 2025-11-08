@@ -38,141 +38,199 @@ CONFIG_JSON=$(echo "$CONFIG_B64" | base64 -d | python3 -c "import sys, urllib.pa
 # 设置环境变量供 Python 使用
 export CONFIG_JSON
 
-# 使用 Python 生成配置文件
+# 使用 Python 生成配置文件（无需 PyYAML 依赖）
 python3 << 'PYTHON_EOF'
 import json, sys, os
 
 config = json.loads(os.environ.get('CONFIG_JSON', '{}'))
-
 rime_dir = os.path.expanduser("~/Library/Rime")
 schema = config.get('schema', 'luna_pinyin')
 
-# 生成方案配置
-schema_config = {
-    'patch': {
-        'schema': {
-            'name': '朙月拼音（簡體優先）' if config.get('simpDefault') == 1 else '朙月拼音（繁體優先）',
-            'description': '快速部署配置'
-        },
-        'switches': [
-            {'name': 'ascii_mode', 'reset': 0 if config.get('asciiMode') else 1, 'states': [' 中文', ' 西文']},
-            {'name': 'full_shape', 'reset': 1 if config.get('fullShape') else 0, 'states': [' 半角', ' 全角']},
-            {'name': 'simplification', 'reset': config.get('simpDefault', 1), 'states': [' 简体', ' 繁體']},
-            {'name': 'ascii_punct', 'reset': 0 if config.get('asciiPunct') else 1, 'states': [' 。，', ' ．，']}
-        ],
-        'switcher': {
-            'caption': '方案選單',
-            'hotkeys': [config.get('hotkeySwitch', 'Control+Shift')],
-            'abbreviate_options': True,
-            'option_list_separator': '／'
-        },
-        'key_binder': {
-            'import_preset': 'default',
-            'bindings': [
-                {'when': 'composing', 'accept': config.get('hotkey', 'Control+Shift+F'), 'toggle': 'simplification'},
-                {'when': 'always', 'accept': config.get('hotkeyAscii', 'Shift_L'), 'toggle': 'ascii_mode'},
-                {'when': 'always', 'accept': config.get('hotkeyFullShape', 'Control+space'), 'toggle': 'full_shape'}
-            ]
-        },
-        'menu': {
-            'alternative_select_labels': config.get('selectLabels', ['1','2','3','4','5','6','7','8','9']),
-            'page_size': config.get('pageSize', 6)
-        }
-    }
-}
+# 手动生成 YAML（无需 PyYAML 库）
+def to_yaml(data, indent=0):
+    """简单的 YAML 生成器"""
+    lines = []
+    prefix = '  ' * indent
 
-# 添加 Emoji 和农历开关
+    if isinstance(data, dict):
+        for key, value in data.items():
+            if isinstance(value, (dict, list)):
+                lines.append(f"{prefix}{key}:")
+                lines.append(to_yaml(value, indent + 1))
+            elif isinstance(value, bool):
+                lines.append(f"{prefix}{key}: {str(value).lower()}")
+            elif isinstance(value, str):
+                # 处理包含特殊字符的字符串
+                if any(c in value for c in [':', '#', '[', ']', '{', '}', '\n']):
+                    lines.append(f"{prefix}{key}: '{value}'")
+                else:
+                    lines.append(f"{prefix}{key}: {value}")
+            else:
+                lines.append(f"{prefix}{key}: {value}")
+    elif isinstance(data, list):
+        for item in data:
+            if isinstance(item, dict):
+                first_key = True
+                for key, value in item.items():
+                    if first_key:
+                        if isinstance(value, list):
+                            lines.append(f"{prefix}- {key}:")
+                            for v in value:
+                                lines.append(f"{prefix}  - {v}")
+                        else:
+                            lines.append(f"{prefix}- {key}: {value}")
+                        first_key = False
+                    else:
+                        lines.append(f"{prefix}  {key}: {value}")
+            else:
+                lines.append(f"{prefix}- {item}")
+
+    return '\n'.join(lines)
+
+# 构建方案配置
+schema_name = '朙月拼音（簡體優先）' if config.get('simpDefault') == 1 else '朙月拼音（繁體優先）'
+
+switches = [
+    {'name': 'ascii_mode', 'reset': 0 if config.get('asciiMode') else 1, 'states': [' 中文', ' 西文']},
+    {'name': 'full_shape', 'reset': 1 if config.get('fullShape') else 0, 'states': [' 半角', ' 全角']},
+    {'name': 'simplification', 'reset': config.get('simpDefault', 1), 'states': [' 简体', ' 繁體']},
+    {'name': 'ascii_punct', 'reset': 0 if config.get('asciiPunct') else 1, 'states': [' 。，', ' ．，']}
+]
+
 if config.get('enableEmoji'):
-    schema_config['patch']['switches'].append({'name': 'emoji', 'reset': 1, 'states': ['🈚️', '🈶️']})
+    switches.append({'name': 'emoji', 'reset': 1, 'states': ['🈚️', '🈶️']})
 if config.get('enableLunar'):
-    schema_config['patch']['switches'].append({'name': 'lunar', 'reset': 0, 'states': ['☀️', '🌙']})
+    switches.append({'name': 'lunar', 'reset': 0, 'states': ['☀️', '🌙']})
+
+# 生成方案 YAML
+schema_yaml = f"""patch:
+  schema:
+    name: {schema_name}
+    description: 快速部署配置
+
+  switches:
+"""
+
+for sw in switches:
+    schema_yaml += f"    - name: {sw['name']}\n"
+    schema_yaml += f"      reset: {sw['reset']}\n"
+    schema_yaml += f"      states: [{', '.join(sw['states'])}]\n"
+
+schema_yaml += f"""
+  switcher:
+    caption: 方案選單
+    hotkeys:
+      - {config.get('hotkeySwitch', 'Control+Shift')}
+    abbreviate_options: true
+    option_list_separator: ／
+
+  key_binder:
+    import_preset: default
+    bindings:
+      - {{when: composing, accept: {config.get('hotkey', 'Control+Shift+F')}, toggle: simplification}}
+      - {{when: always, accept: {config.get('hotkeyAscii', 'Shift_L')}, toggle: ascii_mode}}
+      - {{when: always, accept: {config.get('hotkeyFullShape', 'Control+space')}, toggle: full_shape}}
+
+  menu:
+    page_size: {config.get('pageSize', 6)}
+"""
+
+# 添加选择标签
+if config.get('selectLabels'):
+    labels = ', '.join(config['selectLabels'])
+    schema_yaml += f"    alternative_select_labels: [{labels}]\n"
 
 # 标点符号
 if config.get('enablePunctuator', True):
-    schema_config['patch']['punctuator'] = {'import_preset': 'default'}
+    schema_yaml += "\n  punctuator:\n    import_preset: default\n"
 
 # ASCII Composer
 if config.get('asciiComposer', True):
-    schema_config['patch']['ascii_composer'] = {
-        'good_old_caps_lock': True,
-        'switch_key': {'Caps_Lock': config.get('hotkeyCapsLock', 'Caps_Lock')}
-    }
+    schema_yaml += f"""
+  ascii_composer:
+    good_old_caps_lock: true
+    switch_key:
+      Caps_Lock: {config.get('hotkeyCapsLock', 'Caps_Lock')}
+"""
 
 # 识别器
-patterns = {}
+patterns = []
 if config.get('enableEmail', True):
-    patterns['email'] = "^[A-Za-z][-_.0-9A-Za-z]*@.*$"
+    patterns.append("email: \"^[A-Za-z][-_.0-9A-Za-z]*@.*$\"")
 if config.get('enableUrl', True):
-    patterns['url'] = "^(www[.]|https?:|ftp[.:]|mailto:|file:).*$|^[a-z]+[.].+$"
+    patterns.append("url: \"^(www[.]|https?:|ftp[.:]|mailto:|file:).*$|^[a-z]+[.].+$\"")
 if config.get('enableUppercase', True):
-    patterns['uppercase'] = "[A-Z][-_+.'0-9A-Za-z]*$"
-if patterns:
-    schema_config['patch']['recognizer'] = {'patterns': patterns}
+    patterns.append("uppercase: \"[A-Z][-_+.'0-9A-Za-z]*$\"")
 
-# Emoji 和农历引擎
-if config.get('enableEmoji') or config.get('enableLunar'):
-    translators = ['punct_translator', 'script_translator']
-    if config.get('enableEmoji'):
-        translators.append('table_translator@emoji')
+if patterns or config.get('enableLunar'):
+    schema_yaml += "\n  recognizer:\n    patterns:\n"
+    for p in patterns:
+        schema_yaml += f"      {p}\n"
     if config.get('enableLunar'):
-        translators.extend(['lua_translator@date_translator', 'lua_translator@lunar_translator'])
-    schema_config['patch']['engine/translators'] = translators
+        schema_yaml += "      date: \"^rq$\"\n"
+        schema_yaml += "      lunar: \"^nl$\"\n"
+
+# Emoji/农历引擎
+if config.get('enableEmoji') or config.get('enableLunar'):
+    schema_yaml += "\n  engine/translators:\n"
+    schema_yaml += "    - punct_translator\n"
+    schema_yaml += "    - script_translator\n"
+    if config.get('enableEmoji'):
+        schema_yaml += "    - table_translator@emoji\n"
+    if config.get('enableLunar'):
+        schema_yaml += "    - lua_translator@date_translator\n"
+        schema_yaml += "    - lua_translator@lunar_translator\n"
 
 # Emoji 配置
 if config.get('enableEmoji'):
-    schema_config['patch']['emoji'] = {
-        'dictionary': 'emoji',
-        'enable_completion': False,
-        'prefix': '/',
-        'suffix': '/',
-        'tips': '〔表情〕',
-        'tag': 'emoji'
-    }
-
-# 农历识别
-if config.get('enableLunar'):
-    if 'recognizer' not in schema_config['patch']:
-        schema_config['patch']['recognizer'] = {'patterns': {}}
-    schema_config['patch']['recognizer']['patterns']['date'] = "^rq$"
-    schema_config['patch']['recognizer']['patterns']['lunar'] = "^nl$"
+    schema_yaml += """
+  emoji:
+    dictionary: emoji
+    enable_completion: false
+    prefix: /
+    suffix: /
+    tips: 〔表情〕
+    tag: emoji
+"""
 
 # 符号输入
 if config.get('enableSymbols', True):
-    schema_config['patch']['punctuator/symbols'] = {
-        '/blx': ['~', '～', '〜', '∼', '≈', '≋', '≃', '≅', '⁓', '〰'],
-        '/ydy': ['≈'],
-        '/zs': ['↑', '↓', '←', '→', '↖', '↗', '↙', '↘', '↔', '↕']
-    }
+    schema_yaml += """
+  punctuator/symbols:
+    /blx: [~, ～, 〜, ∼, ≈, ≋, ≃, ≅, ⁓, 〰]
+    /ydy: [≈]
+    /zs: [↑, ↓, ←, →, ↖, ↗, ↙, ↘, ↔, ↕]
+"""
 
 # 写入方案配置
-import yaml
 schema_file = os.path.join(rime_dir, f"{schema}.custom.yaml")
 with open(schema_file, 'w', encoding='utf-8') as f:
-    yaml.dump(schema_config, f, allow_unicode=True, default_flow_style=False)
+    f.write(schema_yaml)
 print(f"📝 写入方案配置: {schema}.custom.yaml")
 
-# 生成皮肤配置
-squirrel_config = {
-    'patch': {
-        'style': {
-            'color_scheme': config.get('colorScheme', 'lost_temple'),
-            'color_scheme_dark': config.get('colorSchemeDark', 'nord'),
-            'font_face': config.get('fontFace', ''),
-            'font_point': config.get('fontSize', 18),
-            'corner_radius': config.get('cornerRadius', 10),
-            'line_spacing': config.get('lineSpacing', 6),
-            'spacing': config.get('spacing', 8),
-            'inline_preedit': config.get('inlinePreedit', False)
-        }
-    }
-}
+# 生成皮肤配置 YAML
+squirrel_yaml = f"""patch:
+  style:
+    color_scheme: {config.get('colorScheme', 'lost_temple')}
+    color_scheme_dark: {config.get('colorSchemeDark', 'nord')}
+"""
+
+if config.get('fontFace'):
+    squirrel_yaml += f"    font_face: {config['fontFace']}\n"
+
+squirrel_yaml += f"""    font_point: {config.get('fontSize', 18)}
+    corner_radius: {config.get('cornerRadius', 10)}
+    line_spacing: {config.get('lineSpacing', 6)}
+    spacing: {config.get('spacing', 8)}
+    inline_preedit: {str(config.get('inlinePreedit', False)).lower()}
+"""
 
 if config.get('candidateLayout') == 'horizontal':
-    squirrel_config['patch']['style']['horizontal'] = True
+    squirrel_yaml += "    horizontal: true\n"
 
 squirrel_file = os.path.join(rime_dir, "squirrel.custom.yaml")
 with open(squirrel_file, 'w', encoding='utf-8') as f:
-    yaml.dump(squirrel_config, f, allow_unicode=True, default_flow_style=False)
+    f.write(squirrel_yaml)
 print("🎨 写入皮肤配置: squirrel.custom.yaml")
 
 # Emoji 词库（简化版）
