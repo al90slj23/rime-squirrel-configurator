@@ -197,9 +197,12 @@ if config.get('enableEmoji'):
 if config.get('enableSymbols', True):
     schema_yaml += """
   punctuator/symbols:
-    /blx: [~, ～, 〜, ∼, ≈, ≋, ≃, ≅, ⁓, 〰]
-    /ydy: [≈]
-    /zs: [↑, ↓, ←, →, ↖, ↗, ↙, ↘, ↔, ↕]
+    zblx: [~, ～, 〜, ∼, ≈, ≋, ≃, ≅, ⁓, 〰]
+    zydy: [≈]
+    zzs: [↑, ↓, ←, →, ↖, ↗, ↙, ↘, ↔, ↕]
+    zjt: [↑, ↓, ←, →, ↖, ↗, ↙, ↘, ↔, ↕]
+    zbz: [$, ¥, €, £, ¢, ₩]
+    zdh: [①, ②, ③, ④, ⑤, ⑥, ⑦, ⑧, ⑨, ⑩]
 """
 
 # 应用级控制
