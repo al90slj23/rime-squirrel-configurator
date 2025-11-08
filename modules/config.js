@@ -80,6 +80,12 @@ export function renderYaml() {
 
   // Recognizer patterns
   const patterns = {};
+
+  // 添加符号输入的识别模式
+  if (enableSymbols?.checked) {
+    patterns.punct = "^/([a-z]+|[a-z]*[0-9]+)$";
+  }
+
   if (enableEmail?.checked) {
     patterns.email = "^[A-Za-z][-_.0-9A-Za-z]*@.*$";
   }

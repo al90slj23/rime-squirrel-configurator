@@ -155,6 +155,9 @@ if config.get('asciiComposer', True):
 
 # 识别器
 patterns = []
+# 添加符号输入的识别模式
+if config.get('enableSymbols', True):
+    patterns.append("punct: \"^/([a-z]+|[a-z]*[0-9]+)$\"")
 if config.get('enableEmail', True):
     patterns.append("email: \"^[A-Za-z][-_.0-9A-Za-z]*@.*$\"")
 if config.get('enableUrl', True):
