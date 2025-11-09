@@ -573,41 +573,6 @@
   </div>
 </div>
 
-<!-- 内联调试脚本 -->
-<script>
-  // 简单的内联测试，不依赖任何模块
-  document.addEventListener('DOMContentLoaded', function() {
-    console.log('[内联测试] DOM加载完成');
-
-    // 测试按钮和弹窗是否存在
-    const btn = document.getElementById('btnConfigSymbols');
-    const modal = document.getElementById('symbolModal');
-
-    console.log('[内联测试] 按钮存在:', btn !== null);
-    console.log('[内联测试] 弹窗存在:', modal !== null);
-
-    if (btn && modal) {
-      // 添加最简单的点击处理
-      btn.onclick = function(e) {
-        console.log('[内联测试] onclick触发!');
-        modal.style.display = 'block';
-        console.log('[内联测试] 弹窗display已设置为block');
-        return false; // 阻止默认行为
-      };
-
-      console.log('[内联测试] onclick处理器已设置');
-
-      // 3秒后自动测试
-      setTimeout(function() {
-        console.log('[内联测试] 自动触发测试...');
-        btn.click();
-      }, 3000);
-    } else {
-      console.error('[内联测试] 按钮或弹窗元素未找到!');
-    }
-  });
-</script>
-
 <!-- 完全模块化的应用 (46 行，原 1100 行已拆分为 8 个模块) -->
 <script type="module" src="app.js"></script>
 </body>

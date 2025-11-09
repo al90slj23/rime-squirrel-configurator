@@ -70,20 +70,10 @@ export function initSymbolEditor() {
 
     // 打开弹窗
     btnConfig.addEventListener('click', (e) => {
-      console.log('[符号编辑器] 点击了配置按钮', e);
       e.preventDefault(); // 防止默认行为
       e.stopPropagation(); // 防止事件冒泡
 
-      console.log('[符号编辑器] 准备显示弹窗...');
-      console.log('[符号编辑器] 弹窗元素:', modal);
-      console.log('[符号编辑器] 弹窗当前状态:', {
-        display: modal.style.display,
-        className: modal.className,
-        id: modal.id,
-        parentElement: modal.parentElement
-      });
-
-      // 强制设置样式
+      // 设置弹窗样式并显示
       modal.style.display = 'block';
       modal.style.position = 'fixed';
       modal.style.top = '0';
@@ -93,41 +83,56 @@ export function initSymbolEditor() {
       modal.style.zIndex = '10000';
       modal.style.background = 'rgba(0,0,0,0.5)';
 
-      console.log('[符号编辑器] 弹窗样式已设置:', modal.style.cssText);
-
-      try {
-        console.log('[符号编辑器] 开始渲染符号表格...');
-        renderSymbolTable();
-        console.log('[符号编辑器] 符号表格渲染成功');
-      } catch (err) {
-        console.error('[符号编辑器] 渲染符号表格出错:', err);
-      }
-
-      console.log('[符号编辑器] 弹窗应该已显示');
-
-      // 验证弹窗是否真的显示了
-      const computedStyle = window.getComputedStyle(modal);
-      console.log('[符号编辑器] 弹窗计算样式:', {
-        display: computedStyle.display,
-        visibility: computedStyle.visibility,
-        opacity: computedStyle.opacity,
-        position: computedStyle.position,
-        zIndex: computedStyle.zIndex
-      });
+      // 渲染符号表格
+      renderSymbolTable();
     });
 
     console.log('[符号编辑器] 点击事件已绑定');
 
-    // 关闭弹窗
+    // 关闭弹窗函数 - 需要清除所有强制设置的样式
     const closeModal = () => {
+      console.log('[符号编辑器] 执行关闭弹窗');
       modal.style.display = 'none';
+      // 清除强制设置的样式，恢复原始状态
+      modal.style.position = '';
+      modal.style.top = '';
+      modal.style.left = '';
+      modal.style.right = '';
+      modal.style.bottom = '';
+      modal.style.zIndex = '';
+      modal.style.background = '';
+      console.log('[符号编辑器] 弹窗已关闭');
     };
 
-    if (closeBtn) closeBtn.addEventListener('click', closeModal);
-    if (cancelBtn) cancelBtn.addEventListener('click', closeModal);
+    // 关闭按钮
+    if (closeBtn) {
+      closeBtn.addEventListener('click', (e) => {
+        console.log('[符号编辑器] 点击了关闭按钮');
+        e.preventDefault();
+        e.stopPropagation();
+        closeModal();
+      });
+      console.log('[符号编辑器] 关闭按钮事件已绑定');
+    } else {
+      console.warn('[符号编辑器] 关闭按钮未找到');
+    }
+
+    // 取消按钮
+    if (cancelBtn) {
+      cancelBtn.addEventListener('click', (e) => {
+        console.log('[符号编辑器] 点击了取消按钮');
+        e.preventDefault();
+        e.stopPropagation();
+        closeModal();
+      });
+      console.log('[符号编辑器] 取消按钮事件已绑定');
+    } else {
+      console.warn('[符号编辑器] 取消按钮未找到');
+    }
 
     // 点击背景关闭
     modal.addEventListener('click', (e) => {
+      console.log('[符号编辑器] 点击了弹窗背景', e.target === modal);
       if (e.target === modal) {
         closeModal();
       }
